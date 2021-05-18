@@ -14,6 +14,7 @@ namespace SKAT_Anonymizer
         public const string SexM = "m";
         public const string SexW = "w";
 
+        
         public const string ColID = "ID";
         public const string ColLastname = "Nachname";
         public const string ColFirstname = "Vorname";
@@ -27,6 +28,7 @@ namespace SKAT_Anonymizer
         public const string ColTimeOfDialysis = "Dialysezeit min";
         public const string ColBloodFlow = "Blutfluss ml pro min";
 
+        public const string ColGroupDescription = "Group";
         public const string ColGroupSizeK = "K";
         public const string ColTCloseness = "t ";
         public const string ColTClosenessGroup = ColTCloseness + "AEK";
@@ -75,6 +77,13 @@ namespace SKAT_Anonymizer
             TimeOfDialysis = 4,
             Bloodflow = 5
         }
-
+        public enum Aggregated : ushort
+        {
+            KtV = 0,
+            PCR = 1,
+            TACUrea = 2,
+            TimeOfDialysis = 3,
+            Bloodflow = 4
+        }
     }
 }

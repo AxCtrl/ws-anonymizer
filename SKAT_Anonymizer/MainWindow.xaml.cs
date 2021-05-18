@@ -31,6 +31,7 @@ namespace SKAT_Anonymizer
         DataTable _data = new DataTable();
         DataTable _anonymousData = new DataTable();
         DataTable _kTCriteriaData = new DataTable();
+        DataTable _MicroAggregatedData = new DataTable();
 
         Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
         public MainWindow()
@@ -47,8 +48,15 @@ namespace SKAT_Anonymizer
             dgAnonymousData.Width =  SystemParameters.PrimaryScreenWidth / 2;
             dgAnonymousData.Height = SystemParameters.PrimaryScreenHeight / 3;
             dgAnonymityMeasure.Width = SystemParameters.PrimaryScreenWidth / 3;
-            dgAnonymityMeasure.Height = SystemParameters.PrimaryScreenHeight / 3;
+            dgAnonymityMeasure.Height = SystemParameters.PrimaryScreenHeight / 4;
+            dgMicroAggregatedData.Width = SystemParameters.PrimaryScreenWidth / 3;
+            dgMicroAggregatedData.Height = SystemParameters.PrimaryScreenHeight / 4;
+        }
 
+        private bool ReadInPatientData(PatientData[] patientDataSet)
+        {
+            // convert data array in a datatable to show in datagrid.
+            _data.Clear();
             // Initialisieren Datatable.
             _data.Columns.Add(CAnonymizer.ColID);
             _data.Columns.Add(CAnonymizer.ColLastname);
@@ -62,6 +70,21 @@ namespace SKAT_Anonymizer
             _data.Columns.Add(CAnonymizer.ColTimeOfDialysis);
             _data.Columns.Add(CAnonymizer.ColBloodFlow);
 
+            int id = 1;
+            foreach (PatientData patient in patientDataSet)
+            {
+                _data.Rows.Add(id, patient.Lastname, patient.Firstname, patient.Birth.ToShortDateString(),
+                              patient.Sex, patient.Diagnosis, patient.KtV, patient.PCR, patient.TACUrea,
+                              patient.TimeOfDialysis, patient.Bloodflow);
+                id++;
+            }
+            return true;
+        }
+
+        private bool ReadInAnonymizedData(Dictionary<int, List<object>> anonymousDataSet)
+        {
+            _anonymousData.Clear();
+
             _anonymousData.Columns.Add(CAnonymizer.ColID);
             _anonymousData.Columns.Add(CAnonymizer.ColAge);
             _anonymousData.Columns.Add(CAnonymizer.ColSex);
@@ -72,7 +95,28 @@ namespace SKAT_Anonymizer
             _anonymousData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
             _anonymousData.Columns.Add(CAnonymizer.ColBloodFlow);
 
-            _kTCriteriaData.Columns.Add("Group");
+            foreach (var anonymousPatient in anonymousDataSet)
+            {
+                _anonymousData.Rows.Add(anonymousPatient.Key, anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Sex],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Diagnosis],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.KtV],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.PCR],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TACUrea],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TimeOfDialysis],
+                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Bloodflow]);
+            }
+            return true;
+        }
+
+        private bool ReadInKTCriteriaData(Anonymizer anonymizer)
+        {
+            const int numOfDigits = 3;
+            bool result = false;
+
+            _kTCriteriaData.Clear();
+
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColGroupDescription);
             _kTCriteriaData.Columns.Add(CAnonymizer.ColGroupSizeK);
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColDiag);
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColKtV);
@@ -80,6 +124,76 @@ namespace SKAT_Anonymizer
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTACUrea);
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTimeOfDialysis);
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColBloodFlow);
+
+            if (!(anonymizer is null))
+            {
+
+
+                List<string> qIA = anonymizer.QIA;
+                Dictionary<string, int> kAnonymität = anonymizer.KAnonymity;
+                Dictionary<string, List<double>> tCloseness = anonymizer.TClosenessPerClass;
+
+                double tClosenessDiagnosis = 0.0;
+                double tClosenessKtV = 0.0;
+                double tClosenessPCR = 0.0;
+                double tClosenessTACUrea = 0.0;
+                double tClosenessTimeOfDialysis = 0.0;
+                double tClosenessBloodflow = 0.0;
+
+                for (int i = 0; i < qIA.Count; i++)
+                {
+                    tClosenessDiagnosis = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.Diagnosis], numOfDigits);
+                    tClosenessKtV = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.KtV], numOfDigits);
+                    tClosenessPCR = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.PCR], numOfDigits);
+                    tClosenessTACUrea = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.TACUrea], numOfDigits);
+                    tClosenessTimeOfDialysis = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.TimeOfDialysis], numOfDigits);
+                    tClosenessBloodflow = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.Bloodflow], numOfDigits);
+
+                    _kTCriteriaData.Rows.Add(qIA[i], kAnonymität[qIA[i]], tClosenessDiagnosis,
+                                                                          tClosenessKtV,
+                                                                          tClosenessPCR,
+                                                                          tClosenessTACUrea,
+                                                                          tClosenessTimeOfDialysis,
+                                                                          tClosenessBloodflow);
+                }
+                result = true;
+            }
+
+            return result;
+        }
+
+        private bool ReadInAggregatedData(Anonymizer anonymizer, Dictionary<string, List<object>> microAggregatedData)
+        {
+            const int numOfDigits = 2;
+            bool result = false;
+
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupDescription);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupSizeK);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColKtV);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColPCR);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTACUrea);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTimeOfDialysis);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColBloodFlow);
+
+            if (!(anonymizer is null))
+            {
+
+
+                List<string> groups = anonymizer.QIA;
+                Dictionary<string, int> groupSizes = anonymizer.KAnonymity;
+
+                foreach (var group in groups)
+                {
+                    _MicroAggregatedData.Rows.Add(group, groupSizes[group], 
+                                                  Math.Round(Convert.ToDouble(microAggregatedData[group][(int)CAnonymizer.Aggregated.KtV]), numOfDigits),
+                                                  Math.Round(Convert.ToDouble(microAggregatedData[group][(int)CAnonymizer.Aggregated.PCR]), numOfDigits),
+                                                  Math.Round(Convert.ToDouble(microAggregatedData[group][(int)CAnonymizer.Aggregated.TACUrea]), numOfDigits),
+                                                  Convert.ToInt32((microAggregatedData[group][(int)CAnonymizer.Aggregated.TimeOfDialysis])),
+                                                  Convert.ToInt32((microAggregatedData[group][(int)CAnonymizer.Aggregated.Bloodflow])));
+                }
+                result = true;
+            }
+            return result;
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
@@ -109,72 +223,6 @@ namespace SKAT_Anonymizer
                 }
             }
         }
-        private bool ReadInPatientData(PatientData[] patientDataSet)
-        {
-            // convert data array in a datatable to show in datagrid.
-            _data.Clear();
-            int id = 1;
-            foreach (PatientData patient in patientDataSet)
-            {
-                _data.Rows.Add(id, patient.Lastname, patient.Firstname, patient.Birth.ToShortDateString(),
-                              patient.Sex, patient.Diagnosis, patient.KtV, patient.PCR, patient.TACUrea,
-                              patient.TimeOfDialysis, patient.Bloodflow);
-                id++;
-            }
-            return true;
-        }
-
-        private bool ReadInAnonymizedData(Dictionary<int, List<object>> anonymousDataSet)
-        {
-            _anonymousData.Clear();
-            foreach (KeyValuePair<int, List<object>> anonymousPatient in anonymousDataSet)
-            {
-                // anonymousData.LoadDataRow(anonymousPatient.Value.ToArray(), true);
-                _anonymousData.Rows.Add(anonymousPatient.Key, anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Sex],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Diagnosis],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.KtV],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.PCR],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TACUrea],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TimeOfDialysis],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Bloodflow]);
-            }
-            return true;
-        }
-
-        private bool ReadInKTCriteriaData(Anonymizer anonymizer)
-        {
-            _kTCriteriaData.Clear();
-            List<string> qIA = anonymizer.QIA;
-            Dictionary<string, int> kAnonymität = anonymizer.KAnonymity;
-            Dictionary<string, List<double>> tCloseness = anonymizer.TClosenessPerClass;
-
-            double tClosenessDiagnosis = 0.0;
-            double tClosenessKtV = 0.0;
-            double tClosenessPCR = 0.0;
-            double tClosenessTACUrea = 0.0;
-            double tClosenessTimeOfDialysis = 0.0;
-            double tClosenessBloodflow = 0.0;
-
-            for (int i = 0; i < qIA.Count; i++)
-            {
-                tClosenessDiagnosis = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.Diagnosis], 3);
-                tClosenessKtV = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.KtV], 3);
-                tClosenessPCR = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.PCR], 3);
-                tClosenessTACUrea = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.TACUrea], 3);
-                tClosenessTimeOfDialysis = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.TimeOfDialysis], 3);
-                tClosenessBloodflow = Math.Round(tCloseness.Values.ToArray()[i][(int)CAnonymizer.SA.Bloodflow], 3);
-
-                _kTCriteriaData.Rows.Add(qIA[i], kAnonymität[qIA[i]], tClosenessDiagnosis,
-                                                                      tClosenessKtV,
-                                                                      tClosenessPCR,
-                                                                      tClosenessTACUrea,
-                                                                      tClosenessTimeOfDialysis,
-                                                                      tClosenessBloodflow);
-            }
-
-            return true;
-        }
 
         private void btnGenerateData_Click(object sender, RoutedEventArgs e)
         {
@@ -198,13 +246,9 @@ namespace SKAT_Anonymizer
                 Anonymizer anonymizer = new Anonymizer();
                 Dictionary<int, List<object>> anonymousDataSet = anonymizer.Anonymize(_patientDataSet);
 
-                anonymizer.MicroAggregation(anonymizer.QIA, anonymousDataSet);
+                
                 if (ReadInAnonymizedData(anonymousDataSet))
                 {
-                    // Sort by age
-                    //_anonymousData.DefaultView.Sort = string.Format("{0} {1} , {2}",CAnonymizer.ColAge, CAnonymizer.SortOrderASC, CAnonymizer.ColSex);
-                    //_anonymousData = _anonymousData.DefaultView.ToTable();
-
                     dgAnonymousData.ItemsSource = _anonymousData.DefaultView;
                 }
 
@@ -212,6 +256,13 @@ namespace SKAT_Anonymizer
                 if (ReadInKTCriteriaData(anonymizer))
                 {
                     dgAnonymityMeasure.ItemsSource = _kTCriteriaData.DefaultView;
+                }
+
+                Dictionary<string, List<object>> mAggregatedDAta = anonymizer.MicroAggregation(anonymizer.QIA, anonymousDataSet);
+
+                if (ReadInAggregatedData(anonymizer, mAggregatedDAta))
+                {
+                    dgMicroAggregatedData.ItemsSource = _MicroAggregatedData.DefaultView;
                 }
             }
             else

@@ -19,5 +19,7 @@
         <Label x:Name="lblPatientData" Content="Patientendaten" HorizontalAlignment="Left" Margin="53,110,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
         <Label x:Name="lblAnonymizedData" Content="Anonymisierte Daten" HorizontalAlignment="Left" Margin="53,545,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
         <Label x:Name="ktMeasures" Content="(k,t)Pro Gruppe und sensitivem Attribut" HorizontalAlignment="Left" Margin="1199,110,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
+        <DataGrid x:Name="dgMicroAggregatedData" HorizontalAlignment="Left" Margin="1199,583,0,0" Width="683" IsReadOnly="True" Height="353" VerticalAlignment="Top"/>
+        <Label x:Name="microAggregatedData" Content="Mikro-Aggregierte Daten" HorizontalAlignment="Left" Margin="1199,552,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
     </Grid>
 </Window>
