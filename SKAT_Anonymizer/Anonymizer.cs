@@ -39,6 +39,7 @@ namespace SKAT_Anonymizer
                und Alter berechnen.
             */
             Dictionary<int, List<object>> anonymousDataSet = new Dictionary<int, List<object>>();
+
             Dictionary<string, int> numOfDiagValuesPerTable = new Dictionary<string, int>();
             Dictionary<double, int> numOfNumericValKTVPerTable = new Dictionary<double, int>();
             Dictionary<double, int> numOfNumericValPCRPerTable = new Dictionary<double, int>();
@@ -80,139 +81,139 @@ namespace SKAT_Anonymizer
                 List<object> attributes = new List<object>();                              
 
                 // Alter generalisieren.
-                generalizedAge = GeneralizeAge(CalcAge(patientDataset[i].Birth));
+                generalizedAge = GeneralizeAge(CalcAge(supressPatientData[i].Birth));
 
                 attributes.Add(generalizedAge);
-                attributes.Add(patientDataset[i].Sex);
-                attributes.Add(patientDataset[i].Diagnosis);
-                attributes.Add(patientDataset[i].KtV);
-                attributes.Add(patientDataset[i].PCR);
-                attributes.Add(patientDataset[i].TACUrea);
-                attributes.Add(patientDataset[i].TimeOfDialysis);
-                attributes.Add(patientDataset[i].Bloodflow);
+                attributes.Add(supressPatientData[i].Sex);
+                attributes.Add(supressPatientData[i].Diagnosis);
+                attributes.Add(supressPatientData[i].KtV);
+                attributes.Add(supressPatientData[i].PCR);
+                attributes.Add(supressPatientData[i].TACUrea);
+                attributes.Add(supressPatientData[i].TimeOfDialysis);
+                attributes.Add(supressPatientData[i].Bloodflow);
                 
                 // Anonyme Patientendaten mit id versehen.
                 anonymousDataSet.Add(i + 1, attributes);
                 
                 // Häufigkeit des Attributs im gesamt Datensatz.
-                if (numOfDiagValuesPerTable.ContainsKey(patientDataset[i].Diagnosis))
+                if (numOfDiagValuesPerTable.ContainsKey(supressPatientData[i].Diagnosis))
                 {
-                    numOfDiagValuesPerTable[patientDataset[i].Diagnosis]++;
+                    numOfDiagValuesPerTable[supressPatientData[i].Diagnosis]++;
                 }
                 else
                 {
-                    numOfDiagValuesPerTable.Add(patientDataset[i].Diagnosis, 1);
+                    numOfDiagValuesPerTable.Add(supressPatientData[i].Diagnosis, 1);
                 }
 
-                if (numOfNumericValKTVPerTable.ContainsKey(patientDataset[i].KtV))
+                if (numOfNumericValKTVPerTable.ContainsKey(supressPatientData[i].KtV))
                 {
-                    numOfNumericValKTVPerTable[patientDataset[i].KtV]++;
+                    numOfNumericValKTVPerTable[supressPatientData[i].KtV]++;
                 }
                 else
                 {
-                    numOfNumericValKTVPerTable.Add(patientDataset[i].KtV, 1);
+                    numOfNumericValKTVPerTable.Add(supressPatientData[i].KtV, 1);
                 }
 
-                if (numOfNumericValPCRPerTable.ContainsKey(patientDataset[i].PCR))
+                if (numOfNumericValPCRPerTable.ContainsKey(supressPatientData[i].PCR))
                 {
-                    numOfNumericValPCRPerTable[patientDataset[i].PCR]++;
+                    numOfNumericValPCRPerTable[supressPatientData[i].PCR]++;
                 }
                 else
                 {
-                    numOfNumericValPCRPerTable.Add(patientDataset[i].PCR, 1);
+                    numOfNumericValPCRPerTable.Add(supressPatientData[i].PCR, 1);
                 }
 
-                if (numOfNumericValTACUreaPerTable.ContainsKey(patientDataset[i].TACUrea))
+                if (numOfNumericValTACUreaPerTable.ContainsKey(supressPatientData[i].TACUrea))
                 {
-                    numOfNumericValTACUreaPerTable[patientDataset[i].TACUrea]++;
+                    numOfNumericValTACUreaPerTable[supressPatientData[i].TACUrea]++;
                 }
                 else
                 {
-                    numOfNumericValTACUreaPerTable.Add(patientDataset[i].TACUrea, 1);
+                    numOfNumericValTACUreaPerTable.Add(supressPatientData[i].TACUrea, 1);
                 }
 
-                if (numOfNumericValTimeOfDialysisPerTable.ContainsKey(patientDataset[i].TimeOfDialysis))
+                if (numOfNumericValTimeOfDialysisPerTable.ContainsKey(supressPatientData[i].TimeOfDialysis))
                 {
-                    numOfNumericValTimeOfDialysisPerTable[patientDataset[i].TimeOfDialysis]++;
+                    numOfNumericValTimeOfDialysisPerTable[supressPatientData[i].TimeOfDialysis]++;
                 }
                 else
                 {
-                    numOfNumericValTimeOfDialysisPerTable.Add(patientDataset[i].TimeOfDialysis, 1);
+                    numOfNumericValTimeOfDialysisPerTable.Add(supressPatientData[i].TimeOfDialysis, 1);
                 }
 
-                if (numOfNumericValBloodflowPerTable.ContainsKey(patientDataset[i].Bloodflow))
+                if (numOfNumericValBloodflowPerTable.ContainsKey(supressPatientData[i].Bloodflow))
                 {
-                    numOfNumericValBloodflowPerTable[patientDataset[i].Bloodflow]++;
+                    numOfNumericValBloodflowPerTable[supressPatientData[i].Bloodflow]++;
                 }
                 else
                 {
-                    numOfNumericValBloodflowPerTable.Add(patientDataset[i].Bloodflow, 1);
+                    numOfNumericValBloodflowPerTable.Add(supressPatientData[i].Bloodflow, 1);
                 }
 
                 // Quasi-identifizierende Attribute die maßgeblich für die Äquivalenzklasse sind.
-                qIA = string.Format("{0}, {1}", generalizedAge, patientDataset[i].Sex);
+                qIA = string.Format("{0}, {1}", generalizedAge, supressPatientData[i].Sex);
                                 
                 // Qia vorhanden, alle bereits registrierten werte um 1 erhöhen.
                 if (numOfDiagValuesPerDiagPerClass.ContainsKey(qIA))
                 {
                     // Diagnosen.
-                    if(numOfDiagValuesPerDiagPerClass[qIA].ContainsKey(patientDataset[i].Diagnosis))
+                    if(numOfDiagValuesPerDiagPerClass[qIA].ContainsKey(supressPatientData[i].Diagnosis))
                     {
-                        numOfDiagValuesPerDiagPerClass[qIA][patientDataset[i].Diagnosis]++;
+                        numOfDiagValuesPerDiagPerClass[qIA][supressPatientData[i].Diagnosis]++;
                     }
                     else
                     {
-                        numOfDiagValuesPerDiagPerClass[qIA].Add(patientDataset[i].Diagnosis, 1);
+                        numOfDiagValuesPerDiagPerClass[qIA].Add(supressPatientData[i].Diagnosis, 1);
                     }
 
                     // KtV.
-                    if (numOfNumericValuePerKTVPerClass[qIA].ContainsKey(patientDataset[i].KtV))
+                    if (numOfNumericValuePerKTVPerClass[qIA].ContainsKey(supressPatientData[i].KtV))
                     {
-                        numOfNumericValuePerKTVPerClass[qIA][patientDataset[i].KtV]++;
+                        numOfNumericValuePerKTVPerClass[qIA][supressPatientData[i].KtV]++;
                     }
                     else
                     {
-                        numOfNumericValuePerKTVPerClass[qIA].Add(patientDataset[i].KtV, 1);
+                        numOfNumericValuePerKTVPerClass[qIA].Add(supressPatientData[i].KtV, 1);
                     }
 
                     // PCR.
-                    if (numOfNumericValuePerPCRPerClass[qIA].ContainsKey(patientDataset[i].PCR))
+                    if (numOfNumericValuePerPCRPerClass[qIA].ContainsKey(supressPatientData[i].PCR))
                     {
-                        numOfNumericValuePerPCRPerClass[qIA][patientDataset[i].PCR]++;
+                        numOfNumericValuePerPCRPerClass[qIA][supressPatientData[i].PCR]++;
                     }
                     else
                     {
-                        numOfNumericValuePerPCRPerClass[qIA].Add(patientDataset[i].PCR, 1);
+                        numOfNumericValuePerPCRPerClass[qIA].Add(supressPatientData[i].PCR, 1);
                     }
 
                     // TAC Urea.
-                    if (numOfNumericValuePerTACUreaPerClass[qIA].ContainsKey(patientDataset[i].TACUrea))
+                    if (numOfNumericValuePerTACUreaPerClass[qIA].ContainsKey(supressPatientData[i].TACUrea))
                     {
-                        numOfNumericValuePerTACUreaPerClass[qIA][patientDataset[i].TACUrea]++;
+                        numOfNumericValuePerTACUreaPerClass[qIA][supressPatientData[i].TACUrea]++;
                     }
                     else
                     {
-                        numOfNumericValuePerTACUreaPerClass[qIA].Add(patientDataset[i].TACUrea, 1);
+                        numOfNumericValuePerTACUreaPerClass[qIA].Add(supressPatientData[i].TACUrea, 1);
                     }
 
                     // Time of dialysis.
-                    if (numOfNumericValuePerTimeOfDialysisPerClass[qIA].ContainsKey(patientDataset[i].TimeOfDialysis))
+                    if (numOfNumericValuePerTimeOfDialysisPerClass[qIA].ContainsKey(supressPatientData[i].TimeOfDialysis))
                     {
-                        numOfNumericValuePerTimeOfDialysisPerClass[qIA][patientDataset[i].TimeOfDialysis]++;
+                        numOfNumericValuePerTimeOfDialysisPerClass[qIA][supressPatientData[i].TimeOfDialysis]++;
                     }
                     else
                     {
-                        numOfNumericValuePerTimeOfDialysisPerClass[qIA].Add(patientDataset[i].TimeOfDialysis, 1);
+                        numOfNumericValuePerTimeOfDialysisPerClass[qIA].Add(supressPatientData[i].TimeOfDialysis, 1);
                     }
 
                     // bloodflow.
-                    if (numOfNumericValuePerBloodflowPerClass[qIA].ContainsKey(patientDataset[i].Bloodflow))
+                    if (numOfNumericValuePerBloodflowPerClass[qIA].ContainsKey(supressPatientData[i].Bloodflow))
                     {
-                        numOfNumericValuePerBloodflowPerClass[qIA][patientDataset[i].Bloodflow]++;
+                        numOfNumericValuePerBloodflowPerClass[qIA][supressPatientData[i].Bloodflow]++;
                     }
                     else
                     {
-                        numOfNumericValuePerBloodflowPerClass[qIA].Add(patientDataset[i].Bloodflow, 1);
+                        numOfNumericValuePerBloodflowPerClass[qIA].Add(supressPatientData[i].Bloodflow, 1);
                     }
                 }
                 else
@@ -225,22 +226,22 @@ namespace SKAT_Anonymizer
                     var timeOfDialysis = new Dictionary<int, int>();
                     var bloodflow = new Dictionary<int, int>();
 
-                    diag.Add( patientDataset[i].Diagnosis, 1 );
+                    diag.Add(supressPatientData[i].Diagnosis, 1 );
                     numOfDiagValuesPerDiagPerClass.Add(qIA, diag);
 
-                    ktv.Add(patientDataset[i].KtV, 1);
+                    ktv.Add(supressPatientData[i].KtV, 1);
                     numOfNumericValuePerKTVPerClass.Add(qIA, ktv);
 
-                    pcr.Add(patientDataset[i].PCR, 1);
+                    pcr.Add(supressPatientData[i].PCR, 1);
                     numOfNumericValuePerPCRPerClass.Add(qIA, pcr);
 
-                    tacUrea.Add(patientDataset[i].TACUrea, 1);
+                    tacUrea.Add(supressPatientData[i].TACUrea, 1);
                     numOfNumericValuePerTACUreaPerClass.Add(qIA, tacUrea);
 
-                    timeOfDialysis.Add(patientDataset[i].TimeOfDialysis, 1);
+                    timeOfDialysis.Add(supressPatientData[i].TimeOfDialysis, 1);
                     numOfNumericValuePerTimeOfDialysisPerClass.Add(qIA, timeOfDialysis);
 
-                    bloodflow.Add(patientDataset[i].Bloodflow, 1);
+                    bloodflow.Add(supressPatientData[i].Bloodflow, 1);
                     numOfNumericValuePerBloodflowPerClass.Add(qIA, bloodflow);
                 }
             }// End of for.
@@ -284,6 +285,12 @@ namespace SKAT_Anonymizer
                 probabilitiesPerBloodflowPerTable.Add(Convert.ToDouble(value) / dataSize);
             }
 
+            int lenP = 0;
+            int lenQ = 0;
+            int sumOfOccurence = 0;
+            int minAge = 0;
+            int maxAge = 0;
+            int idGeneratedData = 1000;
 
             foreach (var qia in setOfQIA)
             {
@@ -296,9 +303,9 @@ namespace SKAT_Anonymizer
 
                 // Make P diagnosis and calc t-closeness.
                 List<string> diagnosis = numOfDiagValuesPerDiagPerClass[qia].Keys.ToList<string>();
-                int lenP = diagnosis.Count();
-                int lenQ = probabilitiesPerDiagPerTable.Count();
-                int sumOfOccurence = numOfDiagValuesPerDiagPerClass[qia].Values.Sum();
+                lenP = diagnosis.Count();
+                lenQ = probabilitiesPerDiagPerTable.Count();
+                sumOfOccurence = numOfDiagValuesPerDiagPerClass[qia].Values.Sum();
 
                 for (int j = 0; j < lenQ; j++)
                 {
@@ -427,14 +434,51 @@ namespace SKAT_Anonymizer
 
                 _tClosenessPerGroup.Add(qia, new List<double>(tClosenessPerGroupPerSA));
                 tClosenessPerGroupPerSA.Clear();
-            }
 
-            /* Mittlere Gruppengröße bestimmten. 
-            float averageGroupSize = (float)(dataSize / setOfQIA.Count);
-            int minGroupSize = (int)(0.6 * averageGroupSize);
-            */
+                /*  Mittlere Gruppengröße bestimmten. zufällige Daten generieren. Wie ist der Einfluss auf die Daten 
+                int averageGroupSize = (dataSize / setOfQIA.Count);
+                int minGroupSize = (int)Math.Round((CAnonymizer.thresholdGroup * averageGroupSize), 0);
+
+                if (_kAnonymityPerGroup[qia] >= minGroupSize && _kAnonymityPerGroup[qia] < averageGroupSize)
+                {                   
+                    if(qia.Contains(String.Format("{0} {1}", CAnonymizer.AgeCriteriaYounger, CAnonymizer.Eighteen)))
+                    {
+                        minAge = 5;
+                        maxAge = CAnonymizer.Eighteen - 1;
+                    }
+                    else if((qia.Contains(String.Format("{0} {1} {2}", CAnonymizer.Eighteen, CAnonymizer.AgeCriteriaBetween, CAnonymizer.Thirty))))
+                    {
+                        minAge = CAnonymizer.Eighteen;
+                        maxAge = CAnonymizer.Thirty;
+                    }
+                    else if ((qia.Contains(String.Format("{0} {1} {2}", CAnonymizer.ThirtyOne, CAnonymizer.AgeCriteriaBetween, CAnonymizer.Fifty))))
+                    {
+                        minAge = CAnonymizer.ThirtyOne;
+                        maxAge = CAnonymizer.Fifty;
+                    }
+                    else if ((qia.Contains(String.Format("{0} {1} {2}", CAnonymizer.FiftyOne, CAnonymizer.AgeCriteriaBetween, CAnonymizer.Seventy))))
+                    {
+                        minAge = CAnonymizer.FiftyOne;
+                        maxAge = CAnonymizer.Seventy;
+                    }
+                    else if (qia.Contains(String.Format("{0} {1}", CAnonymizer.AgeCriteriaOlder, CAnonymizer.Seventy)))
+                    {
+                        minAge = CAnonymizer.Seventy + 1;
+                        maxAge = 100;
+                    }
+
+
+                    DataGen dataGen = new DataGen();
+                    anonymousDataSet.Add(idGeneratedData++, new List<object>() { qia.Substring(0, qia.Length-3), qia.Substring(qia.Length -1),
+                        dataGen.GenerateAge(minAge, maxAge), 
+                        dataGen.GenerateLabVal(numOfNumericValuePerKTVPerClass[qia].Keys.ToList<double>()),
+                        dataGen.GenerateLabVal(numOfNumericValuePerPCRPerClass[qia].Keys.ToList<double>()),
+                        dataGen.GenerateLabVal(numOfNumericValuePerTACUreaPerClass[qia].Keys.ToList<double>()),
+                        dataGen.GenerateTimeOfDialOrBloodflow(numOfNumericValuePerTimeOfDialysisPerClass[qia].Keys.ToList<int>()),
+                        dataGen.GenerateTimeOfDialOrBloodflow(numOfNumericValuePerBloodflowPerClass[qia].Keys.ToList<int>())});
+                }*/
+            }        
            
-
            // anonymousDataSet.OrderBy(key => key[][(int)CAnonymizer.Attribute.Age]);
 
             return anonymousDataSet;

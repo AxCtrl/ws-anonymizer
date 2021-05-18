@@ -51,13 +51,17 @@ namespace SKAT_Anonymizer
             dgAnonymityMeasure.Height = SystemParameters.PrimaryScreenHeight / 4;
             dgMicroAggregatedData.Width = SystemParameters.PrimaryScreenWidth / 3;
             dgMicroAggregatedData.Height = SystemParameters.PrimaryScreenHeight / 4;
-        }
 
-        private bool ReadInPatientData(PatientData[] patientDataSet)
-        {
-            // convert data array in a datatable to show in datagrid.
-            _data.Clear();
-            // Initialisieren Datatable.
+            _anonymousData.Columns.Add(CAnonymizer.ColID);
+            _anonymousData.Columns.Add(CAnonymizer.ColAge);
+            _anonymousData.Columns.Add(CAnonymizer.ColSex);
+            _anonymousData.Columns.Add(CAnonymizer.ColDiag);
+            _anonymousData.Columns.Add(CAnonymizer.ColKtV);
+            _anonymousData.Columns.Add(CAnonymizer.ColPCR);
+            _anonymousData.Columns.Add(CAnonymizer.ColTACUrea);
+            _anonymousData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
+            _anonymousData.Columns.Add(CAnonymizer.ColBloodFlow);
+
             _data.Columns.Add(CAnonymizer.ColID);
             _data.Columns.Add(CAnonymizer.ColLastname);
             _data.Columns.Add(CAnonymizer.ColFirstname);
@@ -69,6 +73,24 @@ namespace SKAT_Anonymizer
             _data.Columns.Add(CAnonymizer.ColTACUrea);
             _data.Columns.Add(CAnonymizer.ColTimeOfDialysis);
             _data.Columns.Add(CAnonymizer.ColBloodFlow);
+
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColGroupDescription);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColGroupSizeK);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColDiag);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColKtV);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColPCR);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTACUrea);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTimeOfDialysis);
+            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColBloodFlow);
+
+
+        }
+
+        private bool ReadInPatientData(PatientData[] patientDataSet)
+        {
+            // convert data array in a datatable to show in datagrid.
+            _data.Clear();
+            // Initialisieren Datatable.
 
             int id = 1;
             foreach (PatientData patient in patientDataSet)
@@ -84,16 +106,6 @@ namespace SKAT_Anonymizer
         private bool ReadInAnonymizedData(Dictionary<int, List<object>> anonymousDataSet)
         {
             _anonymousData.Clear();
-
-            _anonymousData.Columns.Add(CAnonymizer.ColID);
-            _anonymousData.Columns.Add(CAnonymizer.ColAge);
-            _anonymousData.Columns.Add(CAnonymizer.ColSex);
-            _anonymousData.Columns.Add(CAnonymizer.ColDiag);
-            _anonymousData.Columns.Add(CAnonymizer.ColKtV);
-            _anonymousData.Columns.Add(CAnonymizer.ColPCR);
-            _anonymousData.Columns.Add(CAnonymizer.ColTACUrea);
-            _anonymousData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
-            _anonymousData.Columns.Add(CAnonymizer.ColBloodFlow);
 
             foreach (var anonymousPatient in anonymousDataSet)
             {
@@ -115,15 +127,6 @@ namespace SKAT_Anonymizer
             bool result = false;
 
             _kTCriteriaData.Clear();
-
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColGroupDescription);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColGroupSizeK);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColDiag);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColKtV);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColPCR);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTACUrea);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTimeOfDialysis);
-            _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColBloodFlow);
 
             if (!(anonymizer is null))
             {
@@ -169,11 +172,11 @@ namespace SKAT_Anonymizer
 
             _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupDescription);
             _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupSizeK);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColKtV);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColPCR);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTACUrea);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTimeOfDialysis);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColBloodFlow);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColKtV);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColPCR);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTACUrea);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColBloodFlow);
 
             if (!(anonymizer is null))
             {

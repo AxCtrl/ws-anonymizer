@@ -55,6 +55,42 @@ namespace PatientDataGenerator
         // Range of attributes.
         string[] Sex = new string[] { "w", "m" };
 
+        /// <summary>
+        /// Berechnet die Standardabweichung für eine gegebene Datenreihe.
+        /// </summary>
+        /// <param name="values">Datenreihe</param>
+        /// <returns>Standardabweichung der Datenreihe</returns>
+        private double CalcStandardVariation(List<double> values)
+        {
+            int n = values.Count();
+            double average = values.Average();
+
+            for (int i = 0; i < n; i++)
+            {
+                values[i] = Math.Pow(values[i] - average, 2);
+            }
+
+            double standardVariation = Math.Sqrt((1 / (n - 1)) * values.Sum());
+
+            return standardVariation;
+        }
+
+        private int CalcStandardVariation(List<int> values)
+        {
+            int n = values.Count();
+            double average = values.Average();
+            List<double> valSubAvg = new List<double>();
+
+            for (int i = 0; i < n; i++)
+            {
+                valSubAvg.Add(Math.Pow(values[i] - average, 2));
+            }
+
+            double standardVariation = Math.Sqrt((double)1 / (n - 1) * valSubAvg.Sum());
+
+            return (int)standardVariation;
+        }
+
         public List<DateTime> GenerateBirthDates(int beginYear, int endYear, int range)
         {
             const int minDay = 1;
@@ -105,9 +141,50 @@ namespace PatientDataGenerator
             return rangeBirthday;
         }
 
+        /// <summary>
+        /// Generiert ein zufälliges Alter basierend auf mittelwert +- Standardabweichung.
+        /// </summary>
+        /// <param name="baseAge">Basis Alter auf dem dem das zufällige Alter genriert wird.</param>
+        /// <returns></returns>
+        public int GenerateAge(int minAge, int maxAge)
+        {
+           return randomizer.Next(minAge, maxAge);
+        }
+
+
+        /// <summary>
+        /// Generiert einen Laborwert basierend auf dem Mittelwert +- Standardabweichung.
+        /// </summary>
+        /// <param name="baseLabVal">Basis für die Laborwertgenerierung</param>
+        /// <returns>Basis Laborwert zufällig Mittelwert +- Standardabweichung</returns>
+        public double GenerateLabVal(List<double> labValues)
+        {
+            double average = labValues.Average();
+            double standardVariation = CalcStandardVariation(labValues);
+            double[] labVal = new double[] { average + standardVariation, average - standardVariation };
+
+
+            return labVal[randomizer.Next(labVal.Length - 1)];
+        }
+
+
+        /// <summary>
+        /// Generiert einen Wer für Dialysezeit oder Blutfluss basierend auf dem Mittelwert +- Standardabweichung.
+        /// </summary>
+        /// <param name="baseLabVal">Basis für die Laborwertgenerierung</param>
+        /// <returns>Basis Laborwert zufällig Mittelwert +- Standardabweichung</returns>
+        public int GenerateTimeOfDialOrBloodflow(List<int> baseValues)
+        {
+            double average = baseValues.Average();
+            int standardVariation = CalcStandardVariation(baseValues);
+            double[] labVal = new double[] { average + standardVariation, average - standardVariation };
+
+            return (int)Math.Round(labVal[randomizer.Next(labVal.Length - 1)]);
+        }
+
         List<string> rangeDiagnosis = new List<string> {"akutes nierenversagen", "chronische nierenkrankheit", "niereninsuffizienz",
                                                     "alport-syndrom", "diabetes", "herzrythmusstörungen"};
-        private double[] GenerateKtV(double beginVal, double endVal, double precision)
+        public double[] GenerateKtV(double beginVal, double endVal, double precision)
         {
             // Fill wit value between 0.8 and 2.5 18 und 0.1
             int range = (int)((endVal - beginVal) / precision) + 1;
@@ -118,8 +195,8 @@ namespace PatientDataGenerator
             }
             return rangeKtV;
         } 
-        
-        private double[] GeneratePCR(double beginVal, double endVal, double precision)
+
+        public double[] GeneratePCR(double beginVal, double endVal, double precision)
         {
                 // 0.5 2.5 0.1 21
             int range = (int)((endVal - beginVal) / precision) + 1;
@@ -132,7 +209,7 @@ namespace PatientDataGenerator
             return rangePCR;
         }
        
-        private double[] GenerateTACUrea(double beginVal, double endVal, double precision)
+        public double[] GenerateTACUrea(double beginVal, double endVal, double precision)
         {
             // Fill wit value between 15. and 75. mg/dl 
             int range = (int)((endVal - beginVal) / precision) + 1;
@@ -146,7 +223,7 @@ namespace PatientDataGenerator
             return rangeTACUrea;
         }
 
-        private int[] GenerateBloodflow(int beginVal, int endVal, int precision)
+        public int[] GenerateBloodflow(int beginVal, int endVal, int precision)
         {
             // Fill wit value between 100. and 500. ml/min
             int range = (int)((endVal - beginVal) / precision) + 1;
@@ -160,7 +237,7 @@ namespace PatientDataGenerator
             return rangeBloodFlow;
         }
         
-        private int[] GenerateTimeOfDialysis(int beginVal, int endVal, int precision)
+        public int[] GenerateTimeOfDialysis(int beginVal, int endVal, int precision)
         {
             // Fill wit value between 120. and 500. min
             int range = (int)((endVal - beginVal) / precision) + 1;

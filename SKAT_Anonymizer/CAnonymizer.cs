@@ -55,6 +55,7 @@ namespace SKAT_Anonymizer
         public const int maxTimeOfDialysis = 350;
         public const int minBloodflow = 100;
         public const int maxBloodflow = 500;
+        public const double thresholdGroup = 0.6;
 
         public enum Attribute : ushort
         {
