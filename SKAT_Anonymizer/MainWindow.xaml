@@ -1,0 +1,23 @@
+﻿<Window x:Class="SKAT_Anonymizer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SKAT_Anonymizer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="{x:Static SystemParameters.FullPrimaryScreenHeight}" Width="{x:Static SystemParameters.FullPrimaryScreenWidth}" 
+                           WindowStartupLocation = "Manual" Top="0" Left="0">
+    <Grid Margin="0,0,0,0">
+        <TextBox x:Name="txtbxFilename" HorizontalAlignment="Left" Margin="53,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="599" Height="23"/>
+        <Button x:Name="btnOpen" Content="open" HorizontalAlignment="Left" Margin="673,58,0,0" VerticalAlignment="Top" Height="21" Width="83" Click="btnOpen_Click"/>
+        <DataGrid x:Name="dgData" HorizontalAlignment="Left" Margin="53,141,0,0" Width="1094" IsReadOnly="True" Height="389" VerticalAlignment="Top"/>
+        <Button x:Name="btnGenerateData" Content="generate data" HorizontalAlignment="Left" Height="22" Margin="673,10,0,0" VerticalAlignment="Top" Width="83" Click="btnGenerateData_Click"/>
+        <TextBox x:Name="inDataSize" HorizontalAlignment="Left" Height="22" Margin="605,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="47"/>
+        <DataGrid x:Name="dgAnonymousData" HorizontalAlignment="Left" Margin="53,574,0,0" Width="1094" IsReadOnly="True" Height="362" VerticalAlignment="Top"/>
+        <DataGrid x:Name="dgAnonymityMeasure" HorizontalAlignment="Left" Margin="1199,141,0,0" Width="683" IsReadOnly="True" Height="389" VerticalAlignment="Top"/>
+        <Button x:Name="btnAnonymize" Content="Anonymize" HorizontalAlignment="Left" Margin="673,100,0,0" VerticalAlignment="Top" Height="21" Width="83" Click="btnAnonymize_Click" FontWeight="Bold"/>
+        <Label x:Name="lblPatientData" Content="Patientendaten" HorizontalAlignment="Left" Margin="53,110,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
+        <Label x:Name="lblAnonymizedData" Content="Anonymisierte Daten" HorizontalAlignment="Left" Margin="53,545,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
+        <Label x:Name="ktMeasures" Content="(k,t)Pro Gruppe und sensitivem Attribut" HorizontalAlignment="Left" Margin="1199,110,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
+    </Grid>
+</Window>
