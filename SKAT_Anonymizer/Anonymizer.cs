@@ -35,9 +35,6 @@ namespace SKAT_Anonymizer
             _tClosenessPerGroup.Clear();
             _kAnonymityPerGroup.Clear();
 
-            /* Daten in Liste mit identifizierer kopieren, dabei Name und Vorname entfernen
-               und Alter berechnen.
-            */
             Dictionary<int, List<object>> anonymousDataSet = new Dictionary<int, List<object>>();
 
             Dictionary<string, int> numOfDiagValuesPerTable = new Dictionary<string, int>();
@@ -83,6 +80,7 @@ namespace SKAT_Anonymizer
                 // Alter generalisieren.
                 generalizedAge = GeneralizeAge(CalcAge(supressPatientData[i].Birth));
 
+                // Patientendaten kopieren, Name und Vorname entfernen und Alter durch Generalisierung ersetzen.
                 attributes.Add(generalizedAge);
                 attributes.Add(supressPatientData[i].Sex);
                 attributes.Add(supressPatientData[i].Diagnosis);
@@ -477,11 +475,54 @@ namespace SKAT_Anonymizer
                         dataGen.GenerateTimeOfDialOrBloodflow(numOfNumericValuePerTimeOfDialysisPerClass[qia].Keys.ToList<int>()),
                         dataGen.GenerateTimeOfDialOrBloodflow(numOfNumericValuePerBloodflowPerClass[qia].Keys.ToList<int>())});
                 }*/
-            }        
-           
-           // anonymousDataSet.OrderBy(key => key[][(int)CAnonymizer.Attribute.Age]);
+            }
+
+            // Testweise Generalisieren der SA.
+            GeneralizeSAWithPattern(ref anonymousDataSet);
 
             return anonymousDataSet;
+        }
+
+        /// <summary>
+        /// Generalisiert die sensitiven Attribute nach vorgegeben Muster bzw. Schwellwerten.
+        /// </summary>
+        /// <param name="anonymousDataset">Die spezifischeren Werte werden durch die Generalisierungen.</param>
+        private void GeneralizeSAWithPattern( ref Dictionary<int, List<object>> anonymousDataset)
+        {
+            IEnumerator<int> generalizedValue = null;
+
+            foreach (var anonoymousPatient in anonymousDataset.Values)
+            {
+                // Generalisierung für TacUrea.
+                generalizedValue = CAnonymizer.TACUreaGeneralization.GetEnumerator();
+                do
+                {
+                    generalizedValue.MoveNext();
+                } while ((double)anonoymousPatient[(int)CAnonymizer.Attribute.TACUrea] > generalizedValue.Current);
+                {
+                }
+                anonoymousPatient[(int)CAnonymizer.Attribute.TACUrea] = (double)generalizedValue.Current;
+
+                // Generalisierung für Dialysezeit.
+                generalizedValue = CAnonymizer.TimeOfDialysisGeneralization.GetEnumerator();
+                do
+                {
+                    generalizedValue.MoveNext();
+                } while ((int)anonoymousPatient[(int)CAnonymizer.Attribute.TimeOfDialysis] > generalizedValue.Current);
+                {
+                }
+                anonoymousPatient[(int)CAnonymizer.Attribute.TimeOfDialysis] = generalizedValue.Current;
+
+                // Generalisierung für Blutfluss.
+                generalizedValue = CAnonymizer.BloodflowGeneralization.GetEnumerator();
+                do
+                {
+                    generalizedValue.MoveNext();
+                } while ((int)anonoymousPatient[(int)CAnonymizer.Attribute.Bloodflow] > generalizedValue.Current);
+                {
+                }
+                anonoymousPatient[(int)CAnonymizer.Attribute.Bloodflow] = generalizedValue.Current;
+            }
         }
 
         private List<PatientData> SuppressColContainsLimitValues(PatientData[] patientDataset)
@@ -491,11 +532,11 @@ namespace SKAT_Anonymizer
             foreach(PatientData patient in patientDataset)
             {
                 // Auf Grenzwerte prüfen und ggf Tupel-unterdrückung durchführen.
-                if (!(patient.KtV < CAnonymizer.minKtV || patient.KtV > CAnonymizer.maxKtV ||
-                     patient.PCR < CAnonymizer.minPCR || patient.PCR > CAnonymizer.maxPCR ||
-                     patient.TACUrea < CAnonymizer.minTACUrea || patient.TACUrea > CAnonymizer.maxTACUrea ||
-                     patient.TimeOfDialysis < CAnonymizer.minTimeOfDialysis || patient.TimeOfDialysis > CAnonymizer.maxTimeOfDialysis ||
-                     patient.Bloodflow < CAnonymizer.minBloodflow || patient.Bloodflow > CAnonymizer.maxBloodflow))
+                if (!(patient.KtV < CAnonymizer.MinKtV || patient.KtV > CAnonymizer.MaxKtV ||
+                     patient.PCR < CAnonymizer.MinPCR || patient.PCR > CAnonymizer.MaxPCR ||
+                     patient.TACUrea < CAnonymizer.MinTACUrea || patient.TACUrea > CAnonymizer.MaxTACUrea ||
+                     patient.TimeOfDialysis < CAnonymizer.MinTimeOfDialysis || patient.TimeOfDialysis > CAnonymizer.MaxTimeOfDialysis ||
+                     patient.Bloodflow < CAnonymizer.MinBloodflow || patient.Bloodflow > CAnonymizer.MaxBloodflow))
                 {
                     suppressedPatiendData.Add(patient);
                 }

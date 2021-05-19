@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PatientDataGenerator
 {
-   public class PatientData
+    public class PatientData
     {
        private string _lastame;
        private string _firstname;

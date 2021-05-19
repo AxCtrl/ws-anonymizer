@@ -83,7 +83,13 @@ namespace SKAT_Anonymizer
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColTimeOfDialysis);
             _kTCriteriaData.Columns.Add(CAnonymizer.ColTCloseness + CAnonymizer.ColBloodFlow);
 
-
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupDescription);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupSizeK);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColKtV);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColPCR);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTACUrea);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
+            _MicroAggregatedData.Columns.Add(CAnonymizer.ColBloodFlow);
         }
 
         private bool ReadInPatientData(PatientData[] patientDataSet)
@@ -99,6 +105,7 @@ namespace SKAT_Anonymizer
                               patient.Sex, patient.Diagnosis, patient.KtV, patient.PCR, patient.TACUrea,
                               patient.TimeOfDialysis, patient.Bloodflow);
                 id++;
+                
             }
             return true;
         }
@@ -169,14 +176,6 @@ namespace SKAT_Anonymizer
         {
             const int numOfDigits = 2;
             bool result = false;
-
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupDescription);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColGroupSizeK);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColKtV);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColPCR);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTACUrea);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
-            _MicroAggregatedData.Columns.Add(CAnonymizer.ColBloodFlow);
 
             if (!(anonymizer is null))
             {

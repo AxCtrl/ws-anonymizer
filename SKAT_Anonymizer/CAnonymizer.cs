@@ -45,17 +45,24 @@ namespace SKAT_Anonymizer
         public const int FiftyOne = 51;
         public const int Seventy = 70;
 
-        public const double minKtV = 0.8;
-        public const double maxKtV = 2.5;
-        public const double minPCR = 0.5;
-        public const double maxPCR = 3.0;
-        public const double minTACUrea = 15.0;
-        public const double maxTACUrea = 200.0;
-        public const int minTimeOfDialysis = 100;
-        public const int maxTimeOfDialysis = 350;
-        public const int minBloodflow = 100;
-        public const int maxBloodflow = 500;
-        public const double thresholdGroup = 0.6;
+        public const double MinKtV = 0.8;
+        public const double MaxKtV = 2.2;
+        public const double MinPCR = 0.5;
+        public const double MaxPCR = 2.5;
+        public const double MinTACUrea = 15.0;
+        public const double MaxTACUrea = 100.0;
+        public const int MinTimeOfDialysis = 100;
+        public const int MaxTimeOfDialysis = 360;
+        public const int MinBloodflow = 100;
+        public const int MaxBloodflow = 500;
+        public const double ThresholdGroup = 0.6;
+
+        public static readonly List<int> TACUreaGeneralization = new List<int>{ 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 85, 90, 100 };
+ 
+        public static readonly List<int> TimeOfDialysisGeneralization = new List<int>{ 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 
+                                                                                       210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 
+                                                                                       310, 320, 330, 340, 350, 360 };
+        public static readonly List<int> BloodflowGeneralization = new List<int>{ 150, 200, 250, 300, 350, 400, 450, 500 };
 
         public enum Attribute : ushort
         {
