@@ -243,10 +243,18 @@ namespace SKAT_Anonymizer
 
         private void btnAnonymize_Click(object sender, RoutedEventArgs e)
         {
+            _anonymousData.Clear();
+            _kTCriteriaData.Clear();
+            _MicroAggregatedData.Clear();
+            dgAnonymousData.ItemsSource = null;
+            dgAnonymityMeasure.ItemsSource = null;
+            dgMicroAggregatedData.ItemsSource = null;
+
             if (_patientDataSet != null)
             {
                 Anonymizer anonymizer = new Anonymizer();
-                Dictionary<int, List<object>> anonymousDataSet = anonymizer.Anonymize(_patientDataSet);
+
+                Dictionary<int, List<object>> anonymousDataSet = anonymizer.Anonymize(_patientDataSet, (bool)cbSAGeneralization.IsChecked, (bool)cbSuppressedGroups.IsChecked);
 
                 
                 if (ReadInAnonymizedData(anonymousDataSet))

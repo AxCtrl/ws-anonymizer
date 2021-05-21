@@ -8,7 +8,7 @@ namespace SKAT_Anonymizer
 {
     class Anonymizer
     {
-        private List<string> _qIA = new List<string>();
+        private List<string> _groups = new List<string>();
         private Dictionary<string, List<double>> _tClosenessPerGroup = new Dictionary<string, List<double>>();
         private Dictionary<string, int> _kAnonymityPerGroup = new Dictionary<string, int>();
 
@@ -25,15 +25,17 @@ namespace SKAT_Anonymizer
 
         public List<string> QIA 
         {
-            get { return _qIA; }
+            get { return _groups; }
         }
 
-        public Dictionary<int, List<object>> Anonymize(PatientData[] patientDataset)
+        public Dictionary<int, List<object>> Anonymize(PatientData[] patientDataset, bool withSAGeneralization, bool withSuppressedSmallGroups)
         {
             // Alte Werte löschen.
-            _qIA.Clear();
+            _groups.Clear();
             _tClosenessPerGroup.Clear();
             _kAnonymityPerGroup.Clear();
+
+            PatientData[] tmpPatientDataSet = (PatientData[])patientDataset.Clone();
 
             Dictionary<int, List<object>> anonymousDataSet = new Dictionary<int, List<object>>();
 
@@ -45,439 +47,157 @@ namespace SKAT_Anonymizer
             Dictionary<int, int> numOfNumericValBloodflowPerTable = new Dictionary<int, int>();
             
 
-            Dictionary<string, Dictionary<string,int>> numOfDiagValuesPerDiagPerClass = new Dictionary<string, Dictionary<string,int>>();
-            Dictionary<string, Dictionary<double, int>> numOfNumericValuePerKTVPerClass = new Dictionary<string, Dictionary<double, int>>();
-            Dictionary<string, Dictionary<double, int>> numOfNumericValuePerPCRPerClass = new Dictionary<string, Dictionary<double, int>>();
-            Dictionary<string, Dictionary<double, int>> numOfNumericValuePerTACUreaPerClass = new Dictionary<string, Dictionary<double, int>>();
-            Dictionary<string, Dictionary<int, int>> numOfNumericValuePerTimeOfDialysisPerClass = new Dictionary<string, Dictionary<int, int>>();
-            Dictionary<string, Dictionary<int, int>> numOfNumericValuePerBloodflowPerClass = new Dictionary<string, Dictionary<int, int>>();
-
-            List<double> probabilitiesPerDiagPerClass = new List<double>();
-            List<double> probabilitiesPerKTVPerClass = new List<double>();
-            List<double> probabilitiesPerPCRPerClass = new List<double>();
-            List<double> probabilitiesPerTACUreaPerClass = new List<double>();
-            List<double> probabilitiesPerTimeOfDialysisPerClass = new List<double>();
-            List<double> probabilitiesPerBloodflowPerClass = new List<double>();
-
-            List<double> probabilitiesPerDiagPerTable = new List<double>();
-            List<double> probabilitiesPerKTVPerTable = new List<double>();
-            List<double> probabilitiesPerPCRPerTable = new List<double>();
-            List<double> probabilitiesPerTACUreaPerTable = new List<double>();
-            List<double> probabilitiesPerTimeOfDialysisPerTable = new List<double>();
-            List<double> probabilitiesPerBloodflowPerTable = new List<double>();
+            Dictionary<string, Dictionary<string,int>> numOfDiagValuesPerDiagPerGroup = new Dictionary<string, Dictionary<string,int>>();
+            Dictionary<string, Dictionary<double, int>> numOfNumericValuePerKTVPerGroup = new Dictionary<string, Dictionary<double, int>>();
+            Dictionary<string, Dictionary<double, int>> numOfNumericValuePerPCRPerGroup = new Dictionary<string, Dictionary<double, int>>();
+            Dictionary<string, Dictionary<double, int>> numOfNumericValuePerTACUreaPerGroup = new Dictionary<string, Dictionary<double, int>>();
+            Dictionary<string, Dictionary<int, int>> numOfNumericValuePerTimeOfDialysisPerGroup = new Dictionary<string, Dictionary<int, int>>();
+            Dictionary<string, Dictionary<int, int>> numOfNumericValuePerBloodflowPerGroup = new Dictionary<string, Dictionary<int, int>>();
 
             string generalizedAge = "";
-            string qIA = "";
-
-            // Auf Grenzwerte prüfen und ggf. Zeile unterdrücken.
-            List<PatientData> supressedPatientData = SuppressColContainsLimitValues(patientDataset);
-
-            // Testweise Generalisieren der SA.
-            GeneralizeSAWithPattern(ref supressedPatientData);
-
-            int dataSize = supressedPatientData.Count;            
+            string group = "";
+            List<object> patientAttributes;
+            int dataSize = tmpPatientDataSet.Length;            
             for (int i = 0; i < dataSize; i++)
-            {              
-                List<object> attributes = new List<object>();                              
-
-                // Alter generalisieren.
-                generalizedAge = GeneralizeAge(CalcAge(supressedPatientData[i].Birth));
-
-                // Patientendaten kopieren, Name und Vorname entfernen und Alter durch Generalisierung ersetzen.
-                attributes.Add(generalizedAge);
-                attributes.Add(supressedPatientData[i].Sex);
-                attributes.Add(supressedPatientData[i].Diagnosis);
-                attributes.Add(supressedPatientData[i].KtV);
-                attributes.Add(supressedPatientData[i].PCR);
-                attributes.Add(supressedPatientData[i].TACUrea);
-                attributes.Add(supressedPatientData[i].TimeOfDialysis);
-                attributes.Add(supressedPatientData[i].Bloodflow);
-                
-                // Anonyme Patientendaten mit id versehen.
-                anonymousDataSet.Add(i + 1, attributes);
-
-                // Häufigkeit des Attributs im gesamt Datensatz.
-                if (numOfDiagValuesPerTable.ContainsKey(supressedPatientData[i].Diagnosis))
+            {
+                // Auf Grenzwerte prüfen, bei Unter- oder Überschreitung Tupelunterdrückung durchführen.
+                if ((tmpPatientDataSet[i].KtV < CAnonymizer.MinKtV || tmpPatientDataSet[i].KtV > CAnonymizer.MaxKtV ||
+                    tmpPatientDataSet[i].PCR < CAnonymizer.MinPCR || tmpPatientDataSet[i].PCR > CAnonymizer.MaxPCR ||
+                    tmpPatientDataSet[i].TACUrea < CAnonymizer.MinTACUrea || tmpPatientDataSet[i].TACUrea > CAnonymizer.MaxTACUrea ||
+                    tmpPatientDataSet[i].TimeOfDialysis < CAnonymizer.MinTimeOfDialysis || tmpPatientDataSet[i].TimeOfDialysis > CAnonymizer.MaxTimeOfDialysis ||
+                    tmpPatientDataSet[i].Bloodflow < CAnonymizer.MinBloodflow || tmpPatientDataSet[i].Bloodflow > CAnonymizer.MaxBloodflow))
                 {
-                    numOfDiagValuesPerTable[supressedPatientData[i].Diagnosis]++;
+                    patientAttributes = new List<object>();
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
+                    patientAttributes.Add(CAnonymizer.Suppressed);
                 }
                 else
                 {
-                    numOfDiagValuesPerTable.Add(supressedPatientData[i].Diagnosis, 1);
-                }
-
-                if (numOfNumericValKTVPerTable.ContainsKey(supressedPatientData[i].KtV))
-                {
-                    numOfNumericValKTVPerTable[supressedPatientData[i].KtV]++;
-                }
-                else
-                {
-                    numOfNumericValKTVPerTable.Add(supressedPatientData[i].KtV, 1);
-                }
-
-                if (numOfNumericValPCRPerTable.ContainsKey(supressedPatientData[i].PCR))
-                {
-                    numOfNumericValPCRPerTable[supressedPatientData[i].PCR]++;
-                }
-                else
-                {
-                    numOfNumericValPCRPerTable.Add(supressedPatientData[i].PCR, 1);
-                }
-
-                if (numOfNumericValTACUreaPerTable.ContainsKey(supressedPatientData[i].TACUrea))
-                {
-                    numOfNumericValTACUreaPerTable[supressedPatientData[i].TACUrea]++;
-                }
-                else
-                {
-                    numOfNumericValTACUreaPerTable.Add(supressedPatientData[i].TACUrea, 1);
-                }
-
-                if (numOfNumericValTimeOfDialysisPerTable.ContainsKey(supressedPatientData[i].TimeOfDialysis))
-                {
-                    numOfNumericValTimeOfDialysisPerTable[supressedPatientData[i].TimeOfDialysis]++;
-                }
-                else
-                {
-                    numOfNumericValTimeOfDialysisPerTable.Add(supressedPatientData[i].TimeOfDialysis, 1);
-                }
-
-                if (numOfNumericValBloodflowPerTable.ContainsKey(supressedPatientData[i].Bloodflow))
-                {
-                    numOfNumericValBloodflowPerTable[supressedPatientData[i].Bloodflow]++;
-                }
-                else
-                {
-                    numOfNumericValBloodflowPerTable.Add(supressedPatientData[i].Bloodflow, 1);
-                }
-
-                // Quasi-identifizierende Attribute die maßgeblich für die Äquivalenzklasse sind.
-                qIA = string.Format("{0}, {1}", generalizedAge, supressedPatientData[i].Sex);
-                                
-                // Qia vorhanden, alle bereits registrierten werte um 1 erhöhen.
-                if (numOfDiagValuesPerDiagPerClass.ContainsKey(qIA))
-                {
-                    // Diagnosen.
-                    if(numOfDiagValuesPerDiagPerClass[qIA].ContainsKey(supressedPatientData[i].Diagnosis))
+                    //**Optional**
+                    //Generalisieren der sensitiven Attribute auf den nächst größeren Wert nach vorgegebenem Muster.
+                    if (withSAGeneralization)
                     {
-                        numOfDiagValuesPerDiagPerClass[qIA][supressedPatientData[i].Diagnosis]++;
-                    }
-                    else
-                    {
-                        numOfDiagValuesPerDiagPerClass[qIA].Add(supressedPatientData[i].Diagnosis, 1);
+                        GeneralizeSAWithPattern(ref tmpPatientDataSet[i]);
                     }
 
-                    // KtV.
-                    if (numOfNumericValuePerKTVPerClass[qIA].ContainsKey(supressedPatientData[i].KtV))
+                    /*Keine Überschreitung Patienten Daten ohne Name und Vorname kopieren, Alter durch Pattern generalisieren.*/
+                    patientAttributes = new List<object>();
+                    generalizedAge = GeneralizeAge(CalcAge(tmpPatientDataSet[i].Birth));
+                    patientAttributes.Add(generalizedAge);
+                    patientAttributes.Add(tmpPatientDataSet[i].Sex);
+                    patientAttributes.Add(tmpPatientDataSet[i].Diagnosis);
+                    patientAttributes.Add(tmpPatientDataSet[i].KtV);
+                    patientAttributes.Add(tmpPatientDataSet[i].PCR);
+                    patientAttributes.Add(tmpPatientDataSet[i].TACUrea);
+                    patientAttributes.Add(tmpPatientDataSet[i].TimeOfDialysis);
+                    patientAttributes.Add(tmpPatientDataSet[i].Bloodflow);
+
+                    // Vorbereitung für t-closeness: Vorkommen der einzelnen Elemente pro Attribut und Gesamtdatensatz.
+                    // Häufigkeit des Attributs im gesamt Datensatz.
+                    CountOccurenceOfAttributePerTable(ref numOfDiagValuesPerTable, tmpPatientDataSet[i]);
+                    CountOccurenceOfAttributePerTable(ref numOfNumericValKTVPerTable, tmpPatientDataSet[i], CAnonymizer.Attribute.KtV);
+                    CountOccurenceOfAttributePerTable(ref numOfNumericValPCRPerTable, tmpPatientDataSet[i], CAnonymizer.Attribute.PCR);
+                    CountOccurenceOfAttributePerTable(ref numOfNumericValTACUreaPerTable, tmpPatientDataSet[i], CAnonymizer.Attribute.TACUrea);
+                    CountOccurenceOfAttributePerTable(ref numOfNumericValTimeOfDialysisPerTable, tmpPatientDataSet[i], CAnonymizer.Attribute.TimeOfDialysis);
+                    CountOccurenceOfAttributePerTable(ref numOfNumericValBloodflowPerTable, tmpPatientDataSet[i], CAnonymizer.Attribute.Bloodflow);
+
+                    // Quasi-identifizierende Attribute die maßgeblich für die Äquivalenzklasse sind.
+                    // In Liste speichern, damit auf die gruppen später zugegriffen werden kann.
+                    group = string.Format("{0}, {1}", generalizedAge, tmpPatientDataSet[i].Sex);
+                    if (!_groups.Contains(group))
                     {
-                        numOfNumericValuePerKTVPerClass[qIA][supressedPatientData[i].KtV]++;
-                    }
-                    else
-                    {
-                        numOfNumericValuePerKTVPerClass[qIA].Add(supressedPatientData[i].KtV, 1);
+                        _groups.Add(group);
                     }
 
-                    // PCR.
-                    if (numOfNumericValuePerPCRPerClass[qIA].ContainsKey(supressedPatientData[i].PCR))
-                    {
-                        numOfNumericValuePerPCRPerClass[qIA][supressedPatientData[i].PCR]++;
-                    }
-                    else
-                    {
-                        numOfNumericValuePerPCRPerClass[qIA].Add(supressedPatientData[i].PCR, 1);
-                    }
-
-                    // TAC Urea.
-                    if (numOfNumericValuePerTACUreaPerClass[qIA].ContainsKey(supressedPatientData[i].TACUrea))
-                    {
-                        numOfNumericValuePerTACUreaPerClass[qIA][supressedPatientData[i].TACUrea]++;
-                    }
-                    else
-                    {
-                        numOfNumericValuePerTACUreaPerClass[qIA].Add(supressedPatientData[i].TACUrea, 1);
-                    }
-
-                    // Time of dialysis.
-                    if (numOfNumericValuePerTimeOfDialysisPerClass[qIA].ContainsKey(supressedPatientData[i].TimeOfDialysis))
-                    {
-                        numOfNumericValuePerTimeOfDialysisPerClass[qIA][supressedPatientData[i].TimeOfDialysis]++;
-                    }
-                    else
-                    {
-                        numOfNumericValuePerTimeOfDialysisPerClass[qIA].Add(supressedPatientData[i].TimeOfDialysis, 1);
-                    }
-
-                    // bloodflow.
-                    if (numOfNumericValuePerBloodflowPerClass[qIA].ContainsKey(supressedPatientData[i].Bloodflow))
-                    {
-                        numOfNumericValuePerBloodflowPerClass[qIA][supressedPatientData[i].Bloodflow]++;
-                    }
-                    else
-                    {
-                        numOfNumericValuePerBloodflowPerClass[qIA].Add(supressedPatientData[i].Bloodflow, 1);
-                    }
+                    // Häufigkeiten des Attributs pro gruppe.
+                    CountOccurenceOfAttributePerGroup(group, ref numOfDiagValuesPerDiagPerGroup, tmpPatientDataSet[i]);
+                    CountOccurenceOfAttributePerGroup(group, ref numOfNumericValuePerKTVPerGroup, tmpPatientDataSet[i], CAnonymizer.Attribute.KtV);
+                    CountOccurenceOfAttributePerGroup(group, ref numOfNumericValuePerPCRPerGroup, tmpPatientDataSet[i], CAnonymizer.Attribute.PCR);
+                    CountOccurenceOfAttributePerGroup(group, ref numOfNumericValuePerTACUreaPerGroup, tmpPatientDataSet[i], CAnonymizer.Attribute.TACUrea);
+                    CountOccurenceOfAttributePerGroup(group, ref numOfNumericValuePerTimeOfDialysisPerGroup, tmpPatientDataSet[i], CAnonymizer.Attribute.TimeOfDialysis);
+                    CountOccurenceOfAttributePerGroup(group, ref numOfNumericValuePerBloodflowPerGroup, tmpPatientDataSet[i], CAnonymizer.Attribute.Bloodflow);
                 }
-                else
-                {
-                    // Qia nicht vorhanden. Neue Werte registrieren.
-                    var diag = new Dictionary<string, int>();
-                    var ktv = new Dictionary<double, int>();
-                    var pcr = new Dictionary<double, int>();
-                    var tacUrea = new Dictionary<double, int>();
-                    var timeOfDialysis = new Dictionary<int, int>();
-                    var bloodflow = new Dictionary<int, int>();
 
-                    diag.Add(supressedPatientData[i].Diagnosis, 1 );
-                    numOfDiagValuesPerDiagPerClass.Add(qIA, diag);
-
-                    ktv.Add(supressedPatientData[i].KtV, 1);
-                    numOfNumericValuePerKTVPerClass.Add(qIA, ktv);
-
-                    pcr.Add(supressedPatientData[i].PCR, 1);
-                    numOfNumericValuePerPCRPerClass.Add(qIA, pcr);
-
-                    tacUrea.Add(supressedPatientData[i].TACUrea, 1);
-                    numOfNumericValuePerTACUreaPerClass.Add(qIA, tacUrea);
-
-                    timeOfDialysis.Add(supressedPatientData[i].TimeOfDialysis, 1);
-                    numOfNumericValuePerTimeOfDialysisPerClass.Add(qIA, timeOfDialysis);
-
-                    bloodflow.Add(supressedPatientData[i].Bloodflow, 1);
-                    numOfNumericValuePerBloodflowPerClass.Add(qIA, bloodflow);
-                }
-            }// End of for.
-
-
-            List<string> setOfQIA = numOfDiagValuesPerDiagPerClass.Keys.ToList<string>();
+                // Pro patient ID und attribute zusammen speichern.
+                anonymousDataSet.Add(i + 1, patientAttributes);
+            }// End of for
 
             int kAnonymity = 0;
-            double p = 0.0;
             double tCloseness = 0.0;
+            List<double> probabilitiesDiagPerGroup = new List<double>();
+            List<double> probabilitiesKTVPerGroup = new List<double>();
+            List<double> probabilitiesPCRPerGroup = new List<double>();
+            List<double> probabilitiesTACUreaPerGroup = new List<double>();
+            List<double> probabilitiesTimeOfDialysisPerGroup = new List<double>();
+            List<double> probabilitiesBloodflowPerGroup = new List<double>();
             List<double> tClosenessPerGroupPerSA = new List<double>();
 
-            // Make Q's.
-            foreach (var value in  numOfDiagValuesPerTable.Values)
+            // Wahrscheinlichkeiten Pro Element für die Gesamttabelle berechnen -> Entspricht der Verteilung Q.
+            List<double> probabilitiesDiagPerTable = CalcProbabilitiesOfAttributePerTable(numOfDiagValuesPerTable, dataSize);
+            List<double> probabilitiesKTVPerTable = CalcProbabilitiesOfAttributePerTable(numOfNumericValKTVPerTable, dataSize);
+            List<double> probabilitiesPCRPerTable = CalcProbabilitiesOfAttributePerTable(numOfNumericValPCRPerTable, dataSize);
+            List<double> probabilitiesTACUreaPerTable = CalcProbabilitiesOfAttributePerTable(numOfNumericValTACUreaPerTable, dataSize);
+            List<double> probabilitiesTimeOfDialysisPerTable = CalcProbabilitiesOfAttributePerTable(numOfNumericValTimeOfDialysisPerTable, dataSize);
+            List<double> probabilitiesBloodflowPerTable = CalcProbabilitiesOfAttributePerTable(numOfNumericValBloodflowPerTable, dataSize);
+
+            foreach (var iGroup in _groups)
             {
-                probabilitiesPerDiagPerTable.Add(Convert.ToDouble(value) / dataSize);
-            }
-
-            foreach(var value in numOfNumericValKTVPerTable.Values)
-            {
-                probabilitiesPerKTVPerTable.Add(Convert.ToDouble(value) / dataSize);
-            }
-
-            foreach(var value in numOfNumericValPCRPerTable.Values)
-            {
-                probabilitiesPerPCRPerTable.Add(Convert.ToDouble(value) / dataSize);
-            }
-
-            foreach (var value in numOfNumericValTACUreaPerTable.Values)
-            {
-                probabilitiesPerTACUreaPerTable.Add(Convert.ToDouble(value) / dataSize);
-            }
-
-            foreach (var value in numOfNumericValTimeOfDialysisPerTable.Values)
-            {
-                probabilitiesPerTimeOfDialysisPerTable.Add(Convert.ToDouble(value) / dataSize);
-            }
-
-            foreach (var value in numOfNumericValBloodflowPerTable.Values)
-            {
-                probabilitiesPerBloodflowPerTable.Add(Convert.ToDouble(value) / dataSize);
-            }
-
-            int lenP = 0;
-            int lenQ = 0;
-            int sumOfOccurence = 0;
-            int minAge = 0;
-            int maxAge = 0;
-            int idGeneratedData = 1000;
-
-            foreach (var qia in setOfQIA)
-            {
-                // Save Groups.
-                _qIA.Add(qia);
-
-                // K-Anonymität
-                kAnonymity = CalcKAnonymityOfGroup(qia, anonymousDataSet);
-                _kAnonymityPerGroup.Add(qia, kAnonymity);
+               
+                // K-Anonymität für jede Gruppe berechnen.
+                kAnonymity = CalcKAnonymityOfGroup(iGroup, anonymousDataSet);
+                _kAnonymityPerGroup.Add(iGroup, kAnonymity);
 
                 // Make P diagnosis and calc t-closeness.
-                List<string> diagnosis = numOfDiagValuesPerDiagPerClass[qia].Keys.ToList<string>();
-                lenP = diagnosis.Count();
-                lenQ = probabilitiesPerDiagPerTable.Count();
-                sumOfOccurence = numOfDiagValuesPerDiagPerClass[qia].Values.Sum();
 
-                for (int j = 0; j < lenQ; j++)
-                {
-                    // Häufigkeit des jeweiligen Attributwertes/ Gesamtanzahl Attributwerte bezogen auf qia.
-                    if (j < lenP)
-                    {
-                        p = Convert.ToDouble(numOfDiagValuesPerDiagPerClass[qia][diagnosis[j]]) / sumOfOccurence;
-                        probabilitiesPerDiagPerClass.Add(p);
-                    }
-                    else
-                    {
-                        probabilitiesPerDiagPerClass.Add(0);
-                    }
-                }
-                tCloseness = CalcTClosenessCatVal(probabilitiesPerDiagPerClass, probabilitiesPerDiagPerTable);
+                probabilitiesDiagPerGroup = CalcProbabilitiesOfAttributePerGroup(probabilitiesDiagPerTable.Count(), 
+                                                                                 numOfDiagValuesPerDiagPerGroup[iGroup]);
+                tCloseness = CalcTClosenessCatVal(probabilitiesDiagPerGroup, probabilitiesDiagPerTable);
                 tClosenessPerGroupPerSA.Add(tCloseness);
-                probabilitiesPerDiagPerClass.Clear();
-
+                probabilitiesDiagPerGroup.Clear();
+                
                 // Make P ktv and calc t-closeness.
-                List<double> ktv = numOfNumericValuePerKTVPerClass[qia].Keys.ToList<double>();
-                lenP = ktv.Count();
-                lenQ = probabilitiesPerKTVPerTable.Count();
-                sumOfOccurence = numOfNumericValuePerKTVPerClass[qia].Values.Sum();
-                for (int j = 0; j < lenQ; j++)
-                {
-                    if (j < lenP)
-                    {
-                        p = Convert.ToDouble(numOfNumericValuePerKTVPerClass[qia][ktv[j]]) / sumOfOccurence;
-                        probabilitiesPerKTVPerClass.Add(p);
-                    }
-                    else
-                    {
-                        probabilitiesPerKTVPerClass.Add(0);
-                    }
-                }
-                tCloseness = CalcTClosenessNumVal(probabilitiesPerKTVPerClass, probabilitiesPerKTVPerTable);
+                probabilitiesKTVPerGroup = CalcProbabilitiesOfAttributePerGroup(probabilitiesKTVPerTable.Count(),
+                                                                                numOfNumericValuePerKTVPerGroup[iGroup]);
+                tCloseness = CalcTClosenessNumVal(probabilitiesKTVPerGroup, probabilitiesKTVPerTable);
                 tClosenessPerGroupPerSA.Add(tCloseness);
-                probabilitiesPerKTVPerClass.Clear();
+                probabilitiesKTVPerGroup.Clear();
 
                 // Make P pcr and calc t-closeness.
-                List<double> pcr = numOfNumericValuePerPCRPerClass[qia].Keys.ToList<double>();
-                lenP = pcr.Count();
-                lenQ = probabilitiesPerPCRPerTable.Count();
-                sumOfOccurence = numOfNumericValuePerPCRPerClass[qia].Values.Sum();
-                for (int j = 0; j < lenQ; j++)
-                {
-                    if (j < lenP)
-                    {
-                        numOfNumericValuePerPCRPerClass[qia].Values.Sum();
-                        p = Convert.ToDouble(numOfNumericValuePerPCRPerClass[qia][pcr[j]]) / sumOfOccurence ;
-                        probabilitiesPerPCRPerClass.Add(p);
-                    }
-                    else
-                    {
-                        probabilitiesPerPCRPerClass.Add(0);
-                    }
-                }
-                tCloseness = CalcTClosenessNumVal(probabilitiesPerPCRPerClass, probabilitiesPerPCRPerTable);
+                probabilitiesPCRPerGroup = CalcProbabilitiesOfAttributePerGroup(probabilitiesPCRPerTable.Count(),
+                                                                                numOfNumericValuePerPCRPerGroup[iGroup]);
+                tCloseness = CalcTClosenessNumVal(probabilitiesPCRPerGroup, probabilitiesPCRPerTable);
                 tClosenessPerGroupPerSA.Add(tCloseness);
-                probabilitiesPerPCRPerClass.Clear();
+                probabilitiesPCRPerGroup.Clear();
 
                 // Make P tac urea and calc t-closeness.
-                List<double> tacUrea = numOfNumericValuePerTACUreaPerClass[qia].Keys.ToList<double>();
-                lenP = tacUrea.Count();
-                lenQ = probabilitiesPerTACUreaPerTable.Count();
-                sumOfOccurence = numOfNumericValuePerTACUreaPerClass[qia].Values.Sum();
-
-                for (int j = 0; j < lenQ; j++)
-                {
-                    if (j < lenP)
-                    {
-                        p = Convert.ToDouble(numOfNumericValuePerTACUreaPerClass[qia][tacUrea[j]]) / sumOfOccurence;
-                        probabilitiesPerTACUreaPerClass.Add(p);
-                    }
-                    else
-                    {
-                        probabilitiesPerTACUreaPerClass.Add(0);
-                    }
-                }
-                tCloseness = CalcTClosenessNumVal(probabilitiesPerTACUreaPerClass, probabilitiesPerTACUreaPerTable);
+                probabilitiesTACUreaPerGroup = CalcProbabilitiesOfAttributePerGroup(probabilitiesTACUreaPerTable.Count(),
+                                                                                numOfNumericValuePerTACUreaPerGroup[iGroup]);
+                tCloseness = CalcTClosenessNumVal(probabilitiesTACUreaPerGroup, probabilitiesTACUreaPerTable);
                 tClosenessPerGroupPerSA.Add(tCloseness);
-                probabilitiesPerTACUreaPerClass.Clear();
+                probabilitiesTACUreaPerGroup.Clear();
 
                 // Make P time of dialysis and calc t-closeness.
-                List<int> timeOfDialysis = numOfNumericValuePerTimeOfDialysisPerClass[qia].Keys.ToList<int>();
-                lenP = timeOfDialysis.Count();
-                lenQ = probabilitiesPerTimeOfDialysisPerTable.Count();
-                sumOfOccurence = numOfNumericValuePerTimeOfDialysisPerClass[qia].Values.Sum();
-
-                for (int j = 0; j < lenQ; j++)
-                {
-                    if (j < lenP)
-                    {
-                        p = Convert.ToDouble(numOfNumericValuePerTimeOfDialysisPerClass[qia][timeOfDialysis[j]]) / sumOfOccurence;
-                        probabilitiesPerTimeOfDialysisPerClass.Add(p);
-                    }
-                    else
-                    {
-                        probabilitiesPerTimeOfDialysisPerClass.Add(0);
-                    }
-                }
-                tCloseness = CalcTClosenessNumVal(probabilitiesPerTimeOfDialysisPerClass, probabilitiesPerTimeOfDialysisPerTable);
+                probabilitiesTimeOfDialysisPerGroup = CalcProbabilitiesOfAttributePerGroup(probabilitiesTimeOfDialysisPerTable.Count(),
+                                                                numOfNumericValuePerTimeOfDialysisPerGroup[iGroup]);
+                tCloseness = CalcTClosenessNumVal(probabilitiesTimeOfDialysisPerGroup, probabilitiesTimeOfDialysisPerTable);
                 tClosenessPerGroupPerSA.Add(tCloseness);
-                probabilitiesPerTimeOfDialysisPerClass.Clear();
+                probabilitiesTimeOfDialysisPerGroup.Clear();
 
                 // Make P time of bloodflow and calc t-closeness.
-                List<int> bloodflow = numOfNumericValuePerBloodflowPerClass[qia].Keys.ToList<int>();
-                lenP = bloodflow.Count();
-                lenQ = probabilitiesPerBloodflowPerTable.Count();
-                sumOfOccurence = numOfNumericValuePerBloodflowPerClass[qia].Values.Sum();
-                for (int j = 0; j < lenQ; j++)
-                {
-                    if (j < lenP)
-                    {
-                        p = Convert.ToDouble(numOfNumericValuePerBloodflowPerClass[qia][bloodflow[j]]) / sumOfOccurence;
-                        probabilitiesPerBloodflowPerClass.Add(p);
-                    }
-                    else
-                    {
-                        probabilitiesPerBloodflowPerClass.Add(0);
-                    }
-                }
-                tCloseness = CalcTClosenessNumVal(probabilitiesPerBloodflowPerClass, probabilitiesPerBloodflowPerTable);
+                probabilitiesBloodflowPerGroup = CalcProbabilitiesOfAttributePerGroup(probabilitiesBloodflowPerTable.Count(),
+                                                                numOfNumericValuePerBloodflowPerGroup[iGroup]);
+                tCloseness = CalcTClosenessNumVal(probabilitiesBloodflowPerGroup, probabilitiesBloodflowPerTable);
                 tClosenessPerGroupPerSA.Add(tCloseness);
-                probabilitiesPerBloodflowPerClass.Clear();
+                probabilitiesBloodflowPerGroup.Clear();
 
-                _tClosenessPerGroup.Add(qia, new List<double>(tClosenessPerGroupPerSA));
+                _tClosenessPerGroup.Add(iGroup, new List<double>(tClosenessPerGroupPerSA));
                 tClosenessPerGroupPerSA.Clear();
-
-                /*  Mittlere Gruppengröße bestimmten. zufällige Daten generieren. Wie ist der Einfluss auf die Daten 
-                int averageGroupSize = (dataSize / setOfQIA.Count);
-                int minGroupSize = (int)Math.Round((CAnonymizer.thresholdGroup * averageGroupSize), 0);
-
-                if (_kAnonymityPerGroup[qia] >= minGroupSize && _kAnonymityPerGroup[qia] < averageGroupSize)
-                {                   
-                    if(qia.Contains(String.Format("{0} {1}", CAnonymizer.AgeCriteriaYounger, CAnonymizer.Eighteen)))
-                    {
-                        minAge = 5;
-                        maxAge = CAnonymizer.Eighteen - 1;
-                    }
-                    else if((qia.Contains(String.Format("{0} {1} {2}", CAnonymizer.Eighteen, CAnonymizer.AgeCriteriaBetween, CAnonymizer.Thirty))))
-                    {
-                        minAge = CAnonymizer.Eighteen;
-                        maxAge = CAnonymizer.Thirty;
-                    }
-                    else if ((qia.Contains(String.Format("{0} {1} {2}", CAnonymizer.ThirtyOne, CAnonymizer.AgeCriteriaBetween, CAnonymizer.Fifty))))
-                    {
-                        minAge = CAnonymizer.ThirtyOne;
-                        maxAge = CAnonymizer.Fifty;
-                    }
-                    else if ((qia.Contains(String.Format("{0} {1} {2}", CAnonymizer.FiftyOne, CAnonymizer.AgeCriteriaBetween, CAnonymizer.Seventy))))
-                    {
-                        minAge = CAnonymizer.FiftyOne;
-                        maxAge = CAnonymizer.Seventy;
-                    }
-                    else if (qia.Contains(String.Format("{0} {1}", CAnonymizer.AgeCriteriaOlder, CAnonymizer.Seventy)))
-                    {
-                        minAge = CAnonymizer.Seventy + 1;
-                        maxAge = 100;
-                    }
-
-
-                    DataGen dataGen = new DataGen();
-                    anonymousDataSet.Add(idGeneratedData++, new List<object>() { qia.Substring(0, qia.Length-3), qia.Substring(qia.Length -1),
-                        dataGen.GenerateAge(minAge, maxAge), 
-                        dataGen.GenerateLabVal(numOfNumericValuePerKTVPerClass[qia].Keys.ToList<double>()),
-                        dataGen.GenerateLabVal(numOfNumericValuePerPCRPerClass[qia].Keys.ToList<double>()),
-                        dataGen.GenerateLabVal(numOfNumericValuePerTACUreaPerClass[qia].Keys.ToList<double>()),
-                        dataGen.GenerateTimeOfDialOrBloodflow(numOfNumericValuePerTimeOfDialysisPerClass[qia].Keys.ToList<int>()),
-                        dataGen.GenerateTimeOfDialOrBloodflow(numOfNumericValuePerBloodflowPerClass[qia].Keys.ToList<int>())});
-                }*/
             }
 
             return anonymousDataSet;
@@ -487,12 +207,9 @@ namespace SKAT_Anonymizer
         /// Generalisiert die sensitiven Attribute nach vorgegeben Muster bzw. Schwellwerten.
         /// </summary>
         /// <param name="anonymousDataset">Die spezifischeren Werte werden durch die Generalisierungen.</param>
-        private void GeneralizeSAWithPattern( ref List<PatientData> patientData)
+        private void GeneralizeSAWithPattern( ref PatientData patient)
         {
             IEnumerator<int> generalizedValue = null;
-
-            foreach (var patient in patientData)
-            {
                 // Generalisierung für TacUrea.
                 generalizedValue = CAnonymizer.TACUreaGeneralization.GetEnumerator();
                 do
@@ -522,26 +239,319 @@ namespace SKAT_Anonymizer
                 {
                 }
                 patient.Bloodflow = generalizedValue.Current;
+        }
+
+        private List<double> CalcProbabilitiesOfAttributePerGroup(int lenQ, Dictionary<string, int> numOfAttribute)
+        {
+            var probabilitiesOfAttributePerGroup = new List<double>();
+
+             // Make P diagnosis and calc t-closeness.
+                List<string> diagnosis = numOfAttribute.Keys.ToList<string>();
+            double pValue = 0;
+            int lenP = diagnosis.Count();
+            int sumOfOccurence = numOfAttribute.Values.Sum();
+
+            for (int j = 0; j < lenQ; j++)
+            {
+                // Häufigkeit des jeweiligen Attributwertes/ Gesamtanzahl Attributwerte bezogen auf qia.
+                if (j < lenP)
+                {
+                    pValue = Convert.ToDouble(numOfAttribute[diagnosis[j]]) / sumOfOccurence;
+                    probabilitiesOfAttributePerGroup.Add(pValue);
+                }
+                else
+                {
+                    probabilitiesOfAttributePerGroup.Add(0);
+                }
+            }
+            return probabilitiesOfAttributePerGroup;
+        }
+
+        private List<double> CalcProbabilitiesOfAttributePerGroup(int lenQ, Dictionary<double, int> numOfAttribute)
+        {
+            var probabilitiesOfAttributePerGroup = new List<double>();
+
+            // Make P diagnosis and calc t-closeness.
+            List<double> value = numOfAttribute.Keys.ToList<double>();
+            double pValue = 0;
+            int lenP = value.Count();
+            int sumOfOccurence = numOfAttribute.Values.Sum();
+
+            for (int j = 0; j < lenQ; j++)
+            {
+                // Häufigkeit des jeweiligen Attributwertes/ Gesamtanzahl Attributwerte bezogen auf qia.
+                if (j < lenP)
+                {
+                    pValue = Convert.ToDouble(numOfAttribute[value[j]]) / sumOfOccurence;
+                    probabilitiesOfAttributePerGroup.Add(pValue);
+                }
+                else
+                {
+                    probabilitiesOfAttributePerGroup.Add(0);
+                }
+            }
+            return probabilitiesOfAttributePerGroup;
+        }
+
+        private List<double> CalcProbabilitiesOfAttributePerGroup(int lenQ, Dictionary<int, int> numOfAttribute)
+        {
+            var probabilitiesOfAttributePerGroup = new List<double>();
+
+            // Make P diagnosis and calc t-closeness.
+            List<int> value = numOfAttribute.Keys.ToList<int>();
+            double pValue = 0;
+            int lenP = value.Count();
+            int sumOfOccurence = numOfAttribute.Values.Sum();
+
+            for (int j = 0; j < lenQ; j++)
+            {
+                // Häufigkeit des jeweiligen Attributwertes/ Gesamtanzahl Attributwerte bezogen auf qia.
+                if (j < lenP)
+                {
+                    pValue = Convert.ToDouble(numOfAttribute[value[j]]) / sumOfOccurence;
+                    probabilitiesOfAttributePerGroup.Add(pValue);
+                }
+                else
+                {
+                    probabilitiesOfAttributePerGroup.Add(0);
+                }
+            }
+            return probabilitiesOfAttributePerGroup;
+        }
+
+        private List<double> CalcProbabilitiesOfAttributePerTable(Dictionary<string, int> numOfAttribut, int datasize)
+        {
+            var probabilitiesOfAttributesPerTable = new List<double>();
+            foreach (var occurence in numOfAttribut.Values)
+            {
+                probabilitiesOfAttributesPerTable.Add(Convert.ToDouble(occurence) / datasize);
+            }
+            return probabilitiesOfAttributesPerTable;
+        }
+
+        private List<double> CalcProbabilitiesOfAttributePerTable(Dictionary<double, int> numOfAttribut, int datasize)
+        {
+            var probabilitiesOfAttributesPerTable = new List<double>();
+            foreach (var occurence in numOfAttribut.Values)
+            {
+                probabilitiesOfAttributesPerTable.Add(Convert.ToDouble(occurence) / datasize);
+            }
+            return probabilitiesOfAttributesPerTable;
+        }
+
+        private List<double> CalcProbabilitiesOfAttributePerTable(Dictionary<int, int> numOfAttribut, int datasize)
+        {
+            var probabilitiesOfAttributesPerTable = new List<double>();
+            foreach (var occurence in numOfAttribut.Values)
+            {
+                probabilitiesOfAttributesPerTable.Add(Convert.ToDouble(occurence) / datasize);
+            }
+            return probabilitiesOfAttributesPerTable;
+        }
+
+        private void CountOccurenceOfAttributePerTable (ref Dictionary<string, int> numOfAttribute, PatientData patient)
+        {
+            if (numOfAttribute.ContainsKey(patient.Diagnosis))
+            {
+                numOfAttribute[patient.Diagnosis]++;
+            }
+            else
+            {
+                numOfAttribute.Add(patient.Diagnosis, 1);
             }
         }
 
-        private List<PatientData> SuppressColContainsLimitValues(PatientData[] patientDataset)
+        private void CountOccurenceOfAttributePerTable(ref Dictionary<double, int> numOfAttribute, PatientData patient, CAnonymizer.Attribute attribute)
         {
-           List<PatientData> suppressedPatiendData = new List<PatientData>();
-
-            foreach(PatientData patient in patientDataset)
+            switch (attribute)
             {
-                // Auf Grenzwerte prüfen und ggf Tupel-unterdrückung durchführen.
-                if (!(patient.KtV < CAnonymizer.MinKtV || patient.KtV > CAnonymizer.MaxKtV ||
-                     patient.PCR < CAnonymizer.MinPCR || patient.PCR > CAnonymizer.MaxPCR ||
-                     patient.TACUrea < CAnonymizer.MinTACUrea || patient.TACUrea > CAnonymizer.MaxTACUrea ||
-                     patient.TimeOfDialysis < CAnonymizer.MinTimeOfDialysis || patient.TimeOfDialysis > CAnonymizer.MaxTimeOfDialysis ||
-                     patient.Bloodflow < CAnonymizer.MinBloodflow || patient.Bloodflow > CAnonymizer.MaxBloodflow))
+                case CAnonymizer.Attribute.KtV:
+                    if (numOfAttribute.ContainsKey(patient.KtV))
+                    {
+                        numOfAttribute[patient.KtV]++;
+                    }
+                    else
+                    {
+                        numOfAttribute.Add(patient.KtV, 1);
+                    }
+                    break;
+                case CAnonymizer.Attribute.PCR:
+                    if (numOfAttribute.ContainsKey(patient.PCR))
+                    {
+                        numOfAttribute[patient.PCR]++;
+                    }
+                    else
+                    {
+                        numOfAttribute.Add(patient.PCR, 1);
+                    }
+                    break;
+                case CAnonymizer.Attribute.TACUrea:
+                    if (numOfAttribute.ContainsKey(patient.TACUrea))
+                    {
+                        numOfAttribute[patient.TACUrea]++;
+                    }
+                    else
+                    {
+                        numOfAttribute.Add(patient.TACUrea, 1);
+                    }
+                    break;
+            }
+        }
+
+        private void CountOccurenceOfAttributePerTable(ref Dictionary<int, int> numOfAttribute, PatientData patient, CAnonymizer.Attribute attribute)
+        {
+            switch (attribute)
+            {
+                case CAnonymizer.Attribute.TimeOfDialysis:
+                    if (numOfAttribute.ContainsKey(patient.TimeOfDialysis))
+                    {
+                        numOfAttribute[patient.TimeOfDialysis]++;
+                    }
+                    else
+                    {
+                        numOfAttribute.Add(patient.TimeOfDialysis, 1);
+                    }
+                    break;
+                case CAnonymizer.Attribute.Bloodflow:
+                    if (numOfAttribute.ContainsKey(patient.Bloodflow))
+                    {
+                        numOfAttribute[patient.Bloodflow]++;
+                    }
+                    else
+                    {
+                        numOfAttribute.Add(patient.Bloodflow, 1);
+                    }
+                    break;
+            }
+        }
+
+        private void CountOccurenceOfAttributePerGroup(string group, ref Dictionary<string, Dictionary<string, int>> numOfAttribute,
+                                                       PatientData patient)
+        {
+            if (numOfAttribute.ContainsKey(group))
+            {
+                // Diagnosen.
+                if (numOfAttribute[group].ContainsKey(patient.Diagnosis))
                 {
-                    suppressedPatiendData.Add(patient);
+                    numOfAttribute[group][patient.Diagnosis]++;
+                }
+                else
+                {
+                    numOfAttribute[group].Add(patient.Diagnosis, 1);
                 }
             }
-            return suppressedPatiendData;
+            else
+            {
+                // Qia nicht vorhanden. Neue Werte registrieren.
+                var diag = new Dictionary<string, int>();
+
+                diag.Add(patient.Diagnosis, 1);
+                numOfAttribute.Add(group, diag);
+            }
+        }
+
+        private void CountOccurenceOfAttributePerGroup(string group, ref Dictionary<string, Dictionary<double, int>> numOfAttribute, 
+                                                       PatientData patient, CAnonymizer.Attribute attribute)
+        {
+            if (numOfAttribute.ContainsKey(group))
+            {
+                switch (attribute)
+                {
+                    case CAnonymizer.Attribute.KtV:
+                        if (numOfAttribute[group].ContainsKey(patient.KtV))
+                        {
+                            numOfAttribute[group][patient.KtV]++;
+                        }
+                        else
+                        {
+                            numOfAttribute[group].Add(patient.KtV, 1);
+                        }
+                        break;
+                    case CAnonymizer.Attribute.PCR:
+                        if (numOfAttribute[group].ContainsKey(patient.PCR))
+                        {
+                            numOfAttribute[group][patient.PCR]++;
+                        }
+                        else
+                        {
+                            numOfAttribute[group].Add(patient.PCR, 1);
+                        }
+                        break;
+                    case CAnonymizer.Attribute.TACUrea:
+                        if (numOfAttribute[group].ContainsKey(patient.TACUrea))
+                        {
+                            numOfAttribute[group][patient.TACUrea]++;
+                        }
+                        else
+                        {
+                            numOfAttribute[group].Add(patient.TACUrea, 1);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                var val = new Dictionary<double, int>();
+                // Group nicht vorhanden, registrieren. 
+                switch (attribute)
+                {
+                    case CAnonymizer.Attribute.KtV:
+                        val.Add(patient.KtV, 1);
+                        break;
+                    case CAnonymizer.Attribute.PCR:
+                        val.Add(patient.PCR, 1);
+                        break;
+                    case CAnonymizer.Attribute.TACUrea:
+                        val.Add(patient.TACUrea, 1);
+                        break;
+                }
+                numOfAttribute.Add(group, val);
+            }
+        }
+
+        private void CountOccurenceOfAttributePerGroup(string group, ref Dictionary<string, Dictionary<int, int>> numOfAttribute, 
+                                                       PatientData patient, CAnonymizer.Attribute attribute)
+        {
+            if (numOfAttribute.ContainsKey(group))
+            {
+                switch (attribute)
+                {
+                    case CAnonymizer.Attribute.TimeOfDialysis:
+                        if (numOfAttribute[group].ContainsKey(patient.TimeOfDialysis))
+                        {
+                            numOfAttribute[group][patient.TimeOfDialysis]++;
+                        }
+                        else
+                        {
+                            numOfAttribute[group].Add(patient.TimeOfDialysis, 1);
+                        }
+                        break;
+                    case CAnonymizer.Attribute.Bloodflow:
+                        if (numOfAttribute[group].ContainsKey(patient.Bloodflow))
+                        {
+                            numOfAttribute[group][patient.Bloodflow]++;
+                        }
+                        else
+                        {
+                            numOfAttribute[group].Add(patient.Bloodflow, 1);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                var val = new Dictionary<int, int>();
+                switch (attribute)
+                {
+                    case CAnonymizer.Attribute.TimeOfDialysis:
+                        val.Add(patient.TimeOfDialysis, 1);
+                        break;
+                    case CAnonymizer.Attribute.Bloodflow:
+                        val.Add(patient.Bloodflow, 1);
+                        break;
+                }
+                numOfAttribute.Add(group, val);
+            }
         }
 
         private int CalcAge(DateTime birth)

@@ -15,11 +15,14 @@
         <TextBox x:Name="inDataSize" HorizontalAlignment="Left" Height="22" Margin="605,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="47"/>
         <DataGrid x:Name="dgAnonymousData" HorizontalAlignment="Left" Margin="53,574,0,0" Width="1094" IsReadOnly="True" Height="362" VerticalAlignment="Top"/>
         <DataGrid x:Name="dgAnonymityMeasure" HorizontalAlignment="Left" Margin="1199,141,0,0" Width="683" IsReadOnly="True" Height="389" VerticalAlignment="Top"/>
-        <Button x:Name="btnAnonymize" Content="Anonymize" HorizontalAlignment="Left" Margin="673,100,0,0" VerticalAlignment="Top" Height="21" Width="83" Click="btnAnonymize_Click" FontWeight="Bold"/>
+        <Button x:Name="btnAnonymize" Content="Anonymize" HorizontalAlignment="Left" Margin="1199,90,0,0" VerticalAlignment="Top" Height="20" Width="82" Click="btnAnonymize_Click" FontWeight="Bold"/>
         <Label x:Name="lblPatientData" Content="Patientendaten" HorizontalAlignment="Left" Margin="53,110,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
         <Label x:Name="lblAnonymizedData" Content="Anonymisierte Daten" HorizontalAlignment="Left" Margin="53,545,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
         <Label x:Name="ktMeasures" Content="(k,t)Pro Gruppe und sensitivem Attribut" HorizontalAlignment="Left" Margin="1199,110,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
         <DataGrid x:Name="dgMicroAggregatedData" HorizontalAlignment="Left" Margin="1199,583,0,0" Width="683" IsReadOnly="True" Height="353" VerticalAlignment="Top"/>
         <Label x:Name="microAggregatedData" Content="Mikro-Aggregierte Daten" HorizontalAlignment="Left" Margin="1199,552,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
+        <GroupBox x:Name="gbOptionsOfAnonymization" Header="Optionen für die Anonymisierung" Margin="1197,7,481,925"/>
+        <CheckBox x:Name="cbSAGeneralization" Content="Generalisierung sensitiver Attribute" HorizontalAlignment="Left" Margin="1215,33,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <CheckBox x:Name="cbSuppressedGroups" Content="Unterdrückung zu kleiner Gruppen" HorizontalAlignment="Left" Margin="1215,53,0,0" VerticalAlignment="Top" IsChecked="True"/>
     </Grid>
 </Window>

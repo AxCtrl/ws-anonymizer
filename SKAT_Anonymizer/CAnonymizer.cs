@@ -57,6 +57,8 @@ namespace SKAT_Anonymizer
         public const int MaxBloodflow = 500;
         public const double ThresholdGroup = 0.6;
 
+        public const string Suppressed = "-";
+
         public static readonly List<int> TACUreaGeneralization = new List<int>{ 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 85, 90, 100 };
  
         public static readonly List<int> TimeOfDialysisGeneralization = new List<int>{ 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 

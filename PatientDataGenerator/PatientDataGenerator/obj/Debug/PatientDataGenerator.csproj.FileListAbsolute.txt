@@ -1,7 +1,6 @@
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\bin\Debug\PatientDataGenerator.exe.config
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\bin\Debug\PatientDataGenerator.exe
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\bin\Debug\PatientDataGenerator.pdb
-D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientDataGenerator.csprojAssemblyReference.cache
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\Interop.ACTIVEXLib.dll
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\Interop.VSTOEE100.dll
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientDataGenerator.csproj.ResolveComReference.cache
