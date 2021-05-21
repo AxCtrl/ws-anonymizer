@@ -26,6 +26,7 @@
         <Label x:Name="ktMeasures" Content="(k,t)Pro Gruppe und sensitivem Attribut" HorizontalAlignment="Left" Margin="1104,103,0,0" VerticalAlignment="Top" Height="30" Width="287" FontWeight="Bold" FontSize="14" Grid.Column="2"/>
         <DataGrid x:Name="dgMicroAggregatedData" HorizontalAlignment="Left" Margin="1107,580,0,0" Width="667" IsReadOnly="True" Height="362" VerticalAlignment="Top" Grid.Column="2"/>
         <Label x:Name="microAggregatedData" Content="Mikro-Aggregierte Daten" HorizontalAlignment="Left" Margin="1107,533,0,0" VerticalAlignment="Top" Height="30" Width="287" FontWeight="Bold" FontSize="14" Grid.Column="2"/>
-        <CheckBox x:Name="cbSAGeneralization" Content="Generalisierung sensitiver Attribute" HorizontalAlignment="Left" Margin="745,540,0,0" VerticalAlignment="Top" Grid.Column="2"/>
+        <CheckBox x:Name="cbSAGeneralization" Content="Generalisierung sensitiver Attribute" HorizontalAlignment="Left" Margin="752,551,0,0" VerticalAlignment="Top" Grid.Column="2"/>
+        <CheckBox x:Name="cbLimitValueSuppression" Content="Tupel-Unterdrückung für Grenzwerte" HorizontalAlignment="Left" Margin="752,521,0,0" VerticalAlignment="Top" Grid.Column="2"/>
     </Grid>
 </Window>

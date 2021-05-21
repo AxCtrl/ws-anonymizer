@@ -266,7 +266,7 @@ namespace SKAT_Anonymizer
             {
                 Anonymizer anonymizer = new Anonymizer();
 
-                Dictionary<int, List<object>> anonymousDataSet = anonymizer.Anonymize(_patientDataSet, (bool)cbSAGeneralization.IsChecked);
+                Dictionary<int, List<object>> anonymousDataSet = anonymizer.Anonymize(_patientDataSet, (bool)cbSAGeneralization.IsChecked, (bool)cbLimitValueSuppression.IsChecked);
 
                 
                 if (ReadInAnonymizedData(anonymousDataSet))

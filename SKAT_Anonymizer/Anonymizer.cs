@@ -28,7 +28,7 @@ namespace SKAT_Anonymizer
             get { return _groups; }
         }
 
-        public Dictionary<int, List<object>> Anonymize(PatientData[] patientDataset, bool withSAGeneralization)
+        public Dictionary<int, List<object>> Anonymize(PatientData[] patientDataset, bool withSAGeneralization, bool withLimitValueSuppression)
         {
             // Alte Werte löschen.
             _groups.Clear();
@@ -61,11 +61,13 @@ namespace SKAT_Anonymizer
             for (int i = 0; i < dataSize; i++)
             {
                 // Auf Grenzwerte prüfen, bei Unter- oder Überschreitung Tupelunterdrückung durchführen.
-                if ((tmpPatientDataSet[i].KtV < CAnonymizer.MinKtV || tmpPatientDataSet[i].KtV > CAnonymizer.MaxKtV ||
+                if (withLimitValueSuppression && 
+                    (tmpPatientDataSet[i].KtV < CAnonymizer.MinKtV || tmpPatientDataSet[i].KtV > CAnonymizer.MaxKtV ||
                     tmpPatientDataSet[i].PCR < CAnonymizer.MinPCR || tmpPatientDataSet[i].PCR > CAnonymizer.MaxPCR ||
                     tmpPatientDataSet[i].TACUrea < CAnonymizer.MinTACUrea || tmpPatientDataSet[i].TACUrea > CAnonymizer.MaxTACUrea ||
                     tmpPatientDataSet[i].TimeOfDialysis < CAnonymizer.MinTimeOfDialysis || tmpPatientDataSet[i].TimeOfDialysis > CAnonymizer.MaxTimeOfDialysis ||
-                    tmpPatientDataSet[i].Bloodflow < CAnonymizer.MinBloodflow || tmpPatientDataSet[i].Bloodflow > CAnonymizer.MaxBloodflow))
+                    tmpPatientDataSet[i].Bloodflow < CAnonymizer.MinBloodflow || tmpPatientDataSet[i].Bloodflow > CAnonymizer.MaxBloodflow)
+                   )
                 {
                     patientAttributes = new List<object>();
                     patientAttributes.Add(CAnonymizer.Suppressed);
