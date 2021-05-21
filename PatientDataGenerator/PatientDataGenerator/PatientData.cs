@@ -81,6 +81,9 @@ namespace PatientDataGenerator
             _timeOfdialysis = timeOfDialysis;
             _bloodflow = bloodflow;
         }
+        public PatientData()
+        {
+        }
 
         public enum Attribute: ushort
         {

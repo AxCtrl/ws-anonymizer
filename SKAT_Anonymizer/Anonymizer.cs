@@ -28,7 +28,7 @@ namespace SKAT_Anonymizer
             get { return _groups; }
         }
 
-        public Dictionary<int, List<object>> Anonymize(PatientData[] patientDataset, bool withSAGeneralization, bool withSuppressedSmallGroups)
+        public Dictionary<int, List<object>> Anonymize(PatientData[] patientDataset, bool withSAGeneralization)
         {
             // Alte Werte löschen.
             _groups.Clear();
@@ -83,7 +83,7 @@ namespace SKAT_Anonymizer
                     //Generalisieren der sensitiven Attribute auf den nächst größeren Wert nach vorgegebenem Muster.
                     if (withSAGeneralization)
                     {
-                        GeneralizeSAWithPattern(ref tmpPatientDataSet[i]);
+                        GeneralizeSAWithPattern(out tmpPatientDataSet[i], patientDataset[i]);
                     }
 
                     /*Keine Überschreitung Patienten Daten ohne Name und Vorname kopieren, Alter durch Pattern generalisieren.*/
@@ -148,7 +148,6 @@ namespace SKAT_Anonymizer
 
             foreach (var iGroup in _groups)
             {
-               
                 // K-Anonymität für jede Gruppe berechnen.
                 kAnonymity = CalcKAnonymityOfGroup(iGroup, anonymousDataSet);
                 _kAnonymityPerGroup.Add(iGroup, kAnonymity);
@@ -207,38 +206,46 @@ namespace SKAT_Anonymizer
         /// Generalisiert die sensitiven Attribute nach vorgegeben Muster bzw. Schwellwerten.
         /// </summary>
         /// <param name="anonymousDataset">Die spezifischeren Werte werden durch die Generalisierungen.</param>
-        private void GeneralizeSAWithPattern( ref PatientData patient)
+        private void GeneralizeSAWithPattern( out PatientData outPatient, PatientData inPatient)
         {
+            // Nicht veränderte Werte kopieren.
+            outPatient = new PatientData();
+            outPatient.Birth = inPatient.Birth;
+            outPatient.Sex = inPatient.Sex;
+            outPatient.Diagnosis = inPatient.Diagnosis;
+            outPatient.KtV = inPatient.KtV;
+            outPatient.PCR = inPatient.PCR;
+
             IEnumerator<int> generalizedValue = null;
                 // Generalisierung für TacUrea.
                 generalizedValue = CAnonymizer.TACUreaGeneralization.GetEnumerator();
                 do
                 {
                     generalizedValue.MoveNext();
-                } while (patient.TACUrea > generalizedValue.Current);
+                } while (inPatient.TACUrea > generalizedValue.Current);
                 {
                 }
-                patient.TACUrea = (double)generalizedValue.Current;
+                outPatient.TACUrea = (double)generalizedValue.Current;
 
                 // Generalisierung für Dialysezeit.
                 generalizedValue = CAnonymizer.TimeOfDialysisGeneralization.GetEnumerator();
                 do
                 {
                     generalizedValue.MoveNext();
-                } while (patient.TimeOfDialysis > generalizedValue.Current);
+                } while (inPatient.TimeOfDialysis > generalizedValue.Current);
                 {
                 }
-                patient.TimeOfDialysis = generalizedValue.Current;
+                outPatient.TimeOfDialysis = generalizedValue.Current;
 
                 // Generalisierung für Blutfluss.
                 generalizedValue = CAnonymizer.BloodflowGeneralization.GetEnumerator();
                 do
                 {
                     generalizedValue.MoveNext();
-                } while (patient.Bloodflow > generalizedValue.Current);
+                } while (inPatient.Bloodflow > generalizedValue.Current);
                 {
                 }
-                patient.Bloodflow = generalizedValue.Current;
+                outPatient.Bloodflow = generalizedValue.Current;
         }
 
         private List<double> CalcProbabilitiesOfAttributePerGroup(int lenQ, Dictionary<string, int> numOfAttribute)
