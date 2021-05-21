@@ -32,6 +32,8 @@ namespace SKAT_Anonymizer
         DataTable _anonymousData = new DataTable();
         DataTable _kTCriteriaData = new DataTable();
         DataTable _MicroAggregatedData = new DataTable();
+        int _numOfSuppressedData = 0;
+        int _numOfAnonymousData = 0;
 
         Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
         public MainWindow()
@@ -41,16 +43,6 @@ namespace SKAT_Anonymizer
             openFileDlg.FileName = DefFilename;
             openFileDlg.DefaultExt = DefFileExt;
             openFileDlg.Filter = DlgFilter;
-
-           
-            dgData.Width =  SystemParameters.PrimaryScreenWidth / 2;
-            dgData.Height = SystemParameters.PrimaryScreenHeight / 3;
-            dgAnonymousData.Width =  SystemParameters.PrimaryScreenWidth / 2;
-            dgAnonymousData.Height = SystemParameters.PrimaryScreenHeight / 3;
-            dgAnonymityMeasure.Width = SystemParameters.PrimaryScreenWidth / 3;
-            dgAnonymityMeasure.Height = SystemParameters.PrimaryScreenHeight / 4;
-            dgMicroAggregatedData.Width = SystemParameters.PrimaryScreenWidth / 3;
-            dgMicroAggregatedData.Height = SystemParameters.PrimaryScreenHeight / 4;
 
             _anonymousData.Columns.Add(CAnonymizer.ColID);
             _anonymousData.Columns.Add(CAnonymizer.ColAge);
@@ -90,6 +82,9 @@ namespace SKAT_Anonymizer
             _MicroAggregatedData.Columns.Add(CAnonymizer.ColTACUrea);
             _MicroAggregatedData.Columns.Add(CAnonymizer.ColTimeOfDialysis);
             _MicroAggregatedData.Columns.Add(CAnonymizer.ColBloodFlow);
+
+            lblPatientData.Content = CAnonymizer.lblPatientData;
+            lblAnonymizedData.Content = CAnonymizer.lblAnonymousData;
         }
 
         private bool ReadInPatientData(PatientData[] patientDataSet)
@@ -116,6 +111,14 @@ namespace SKAT_Anonymizer
 
             foreach (var anonymousPatient in anonymousDataSet)
             {
+                if (anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age].ToString() == "-")
+                {
+                    _numOfSuppressedData++;
+                }
+                else
+                {
+                    _numOfAnonymousData++;
+                }
                 _anonymousData.Rows.Add(anonymousPatient.Key, anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age],
                                                              anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Sex],
                                                              anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Diagnosis],
@@ -174,6 +177,8 @@ namespace SKAT_Anonymizer
 
         private bool ReadInAggregatedData(Anonymizer anonymizer, Dictionary<string, List<object>> microAggregatedData)
         {
+            _MicroAggregatedData.Clear();
+
             const int numOfDigits = 2;
             bool result = false;
 
@@ -205,6 +210,9 @@ namespace SKAT_Anonymizer
             dgData.ItemsSource = null;
             dgAnonymousData.ItemsSource = null;
             dgAnonymityMeasure.ItemsSource = null;
+            dgMicroAggregatedData.ItemsSource = null;
+            lblPatientData.Content = CAnonymizer.lblPatientData;
+            lblAnonymizedData.Content = CAnonymizer.lblAnonymousData;
 
             // Reset filename
             openFileDlg.FileName = DefFilename;
@@ -222,6 +230,7 @@ namespace SKAT_Anonymizer
                 if (ReadInPatientData(_patientDataSet))
                 {
                     dgData.ItemsSource = _data.DefaultView;
+                    lblPatientData.Content = String.Format("{0} {1}", CAnonymizer.lblPatientData, _patientDataSet.Length);
                 }
             }
         }
@@ -250,6 +259,9 @@ namespace SKAT_Anonymizer
             dgAnonymityMeasure.ItemsSource = null;
             dgMicroAggregatedData.ItemsSource = null;
 
+            _numOfAnonymousData = 0;
+            _numOfSuppressedData = 0;
+
             if (_patientDataSet != null)
             {
                 Anonymizer anonymizer = new Anonymizer();
@@ -260,6 +272,8 @@ namespace SKAT_Anonymizer
                 if (ReadInAnonymizedData(anonymousDataSet))
                 {
                     dgAnonymousData.ItemsSource = _anonymousData.DefaultView;
+                    lblAnonymizedData.Content = String.Format("{0}{1}{2}, {3}{4}", CAnonymizer.lblAnonymousData, CAnonymizer.lblAnonymousDataAnonym, _numOfAnonymousData, 
+                                                                                  CAnonymizer.lbAnonymousDataSuppressed, _numOfSuppressedData);
                 }
 
 

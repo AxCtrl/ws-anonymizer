@@ -5,23 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SKAT_Anonymizer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="{x:Static SystemParameters.FullPrimaryScreenHeight}" Width="{x:Static SystemParameters.FullPrimaryScreenWidth}" 
+        Title="(k, t)-Anonymisierer" Height="{x:Static SystemParameters.FullPrimaryScreenHeight}" Width="{x:Static SystemParameters.FullPrimaryScreenWidth}" 
                            WindowStartupLocation = "Manual" Top="0" Left="0">
     <Grid Margin="0,0,0,0">
-        <TextBox x:Name="txtbxFilename" HorizontalAlignment="Left" Margin="53,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="599" Height="23"/>
-        <Button x:Name="btnOpen" Content="open" HorizontalAlignment="Left" Margin="673,58,0,0" VerticalAlignment="Top" Height="21" Width="83" Click="btnOpen_Click"/>
-        <DataGrid x:Name="dgData" HorizontalAlignment="Left" Margin="53,141,0,0" Width="1094" IsReadOnly="True" Height="389" VerticalAlignment="Top"/>
-        <Button x:Name="btnGenerateData" Content="generate data" HorizontalAlignment="Left" Height="22" Margin="673,10,0,0" VerticalAlignment="Top" Width="83" Click="btnGenerateData_Click"/>
-        <TextBox x:Name="inDataSize" HorizontalAlignment="Left" Height="22" Margin="605,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="47"/>
-        <DataGrid x:Name="dgAnonymousData" HorizontalAlignment="Left" Margin="53,574,0,0" Width="1094" IsReadOnly="True" Height="362" VerticalAlignment="Top"/>
-        <DataGrid x:Name="dgAnonymityMeasure" HorizontalAlignment="Left" Margin="1199,141,0,0" Width="683" IsReadOnly="True" Height="389" VerticalAlignment="Top"/>
-        <Button x:Name="btnAnonymize" Content="Anonymize" HorizontalAlignment="Left" Margin="1199,90,0,0" VerticalAlignment="Top" Height="20" Width="82" Click="btnAnonymize_Click" FontWeight="Bold"/>
-        <Label x:Name="lblPatientData" Content="Patientendaten" HorizontalAlignment="Left" Margin="53,110,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
-        <Label x:Name="lblAnonymizedData" Content="Anonymisierte Daten" HorizontalAlignment="Left" Margin="53,545,0,0" VerticalAlignment="Top" Height="26" Width="185" FontWeight="Bold" FontSize="14"/>
-        <Label x:Name="ktMeasures" Content="(k,t)Pro Gruppe und sensitivem Attribut" HorizontalAlignment="Left" Margin="1199,110,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
-        <DataGrid x:Name="dgMicroAggregatedData" HorizontalAlignment="Left" Margin="1199,583,0,0" Width="683" IsReadOnly="True" Height="353" VerticalAlignment="Top"/>
-        <Label x:Name="microAggregatedData" Content="Mikro-Aggregierte Daten" HorizontalAlignment="Left" Margin="1199,552,0,0" VerticalAlignment="Top" Height="26" Width="287" FontWeight="Bold" FontSize="14"/>
-        <GroupBox x:Name="gbOptionsOfAnonymization" Header="Optionen für die Anonymisierung" Margin="1197,7,481,925"/>
-        <CheckBox x:Name="cbSAGeneralization" Content="Generalisierung sensitiver Attribute" HorizontalAlignment="Left" Margin="1215,33,0,0" VerticalAlignment="Top"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="92*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="1809*"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="txtbxFilename" HorizontalAlignment="Left" Margin="53,56,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="575" Height="23" Grid.ColumnSpan="3"/>
+        <Button x:Name="btnOpen" Content="Datei öffnen" HorizontalAlignment="Left" Margin="538,58,0,0" VerticalAlignment="Top" Height="21" Width="182" Click="btnOpen_Click" Grid.Column="2"/>
+        <DataGrid x:Name="dgData" HorizontalAlignment="Left" Margin="53,141,0,0" Width="1111" IsReadOnly="True" Height="338" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+        <Button x:Name="btnGenerateData" Content="Patientendaten generieren" HorizontalAlignment="Left" Height="22" Margin="538,10,0,0" VerticalAlignment="Top" Width="182" Click="btnGenerateData_Click" Grid.Column="2"/>
+        <TextBox x:Name="inDataSize" HorizontalAlignment="Left" Height="22" Margin="465,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="52" Grid.Column="2"/>
+        <DataGrid x:Name="dgAnonymousData" HorizontalAlignment="Left" Margin="56,580,0,0" Width="1111" IsReadOnly="True" Height="362" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+        <DataGrid x:Name="dgAnonymityMeasure" HorizontalAlignment="Left" Margin="1104,141,0,0" Width="667" IsReadOnly="True" Height="338" VerticalAlignment="Top" Grid.Column="2"/>
+        <Button x:Name="btnAnonymize" Content="Patientendaten Anonymisieren" HorizontalAlignment="Left" Margin="538,538,0,0" VerticalAlignment="Top" Height="20" Width="182" Click="btnAnonymize_Click" FontWeight="Bold" Grid.Column="2"/>
+        <Label x:Name="lblPatientData" Content="Patientendaten: " HorizontalAlignment="Left" Margin="53,103,0,0" VerticalAlignment="Top" Height="30" Width="287" FontWeight="Bold" FontSize="14" Grid.ColumnSpan="3"/>
+        <Label x:Name="lblAnonymizedData" Content="Anonymisierte Daten:" HorizontalAlignment="Left" Margin="56,533,0,0" VerticalAlignment="Top" Height="31" Width="547" FontWeight="Bold" FontSize="14" Grid.ColumnSpan="3"/>
+        <Label x:Name="ktMeasures" Content="(k,t)Pro Gruppe und sensitivem Attribut" HorizontalAlignment="Left" Margin="1104,103,0,0" VerticalAlignment="Top" Height="30" Width="287" FontWeight="Bold" FontSize="14" Grid.Column="2"/>
+        <DataGrid x:Name="dgMicroAggregatedData" HorizontalAlignment="Left" Margin="1107,580,0,0" Width="667" IsReadOnly="True" Height="362" VerticalAlignment="Top" Grid.Column="2"/>
+        <Label x:Name="microAggregatedData" Content="Mikro-Aggregierte Daten" HorizontalAlignment="Left" Margin="1107,533,0,0" VerticalAlignment="Top" Height="30" Width="287" FontWeight="Bold" FontSize="14" Grid.Column="2"/>
+        <CheckBox x:Name="cbSAGeneralization" Content="Generalisierung sensitiver Attribute" HorizontalAlignment="Left" Margin="745,540,0,0" VerticalAlignment="Top" Grid.Column="2"/>
     </Grid>
 </Window>

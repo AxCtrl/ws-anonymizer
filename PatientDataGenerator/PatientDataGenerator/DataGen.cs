@@ -53,7 +53,7 @@ namespace PatientDataGenerator
                                          "Reise", "Cole", "Bastian", "Wein", "Woods"};
 
         // Range of attributes.
-        string[] Sex = new string[] { "w", "m" };
+        string[] Sex = new string[] { "M", "W" };
 
         /// <summary>
         /// Berechnet die Standardabweichung für eine gegebene Datenreihe.
@@ -182,8 +182,8 @@ namespace PatientDataGenerator
             return (int)Math.Round(labVal[randomizer.Next(labVal.Length - 1)]);
         }
 
-        List<string> rangeDiagnosis = new List<string> {"akutes nierenversagen", "chronische nierenkrankheit", "niereninsuffizienz",
-                                                    "alport-syndrom", "diabetes", "herzrythmusstörungen"};
+        List<string> rangeDiagnosis = new List<string> {"Akutes Nierenversagen", "Chronische Nierenkrankheit", "Niereninsuffizienz",
+                                                    "Alport-Syndrom", "Diabetes Mellitus"};
         public double[] GenerateKtV(double beginVal, double endVal, double precision)
         {
             // Fill wit value between 0.8 and 2.5 18 und 0.1
@@ -304,8 +304,8 @@ namespace PatientDataGenerator
                 {
 
                     // Create an array for the headers and add it to cells A1:j1
-                    object[] datasetHeader = { "name", "vorname", "geburtsdatum", "geschlecht", "diagnose",
-                                        "ktv", "pcr g pro kg pro Tag", "tac urea mg pro dl", "dialysezeit min", "blutfluss ml pro min" };
+                    object[] datasetHeader = { "Name", "Vorname", "Geburtsdatum", "Geschlecht", "Diagnose",
+                                        "KtV", "PCR g pro kg pro Tag", "TAC Urea mg pro dl", "Dialysezeit min", "Blutfluss ml pro min" };
 
                     var sheetRange = sheetExcel.get_Range("A1", "J1");
                     sheetRange.Value = datasetHeader;

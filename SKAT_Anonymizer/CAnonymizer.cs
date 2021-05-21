@@ -11,8 +11,13 @@ namespace SKAT_Anonymizer
         public const string AgeCriteriaOlder = " > ";
         public const string AgeCriteriaEqual = "=";
 
-        public const string SexM = "m";
-        public const string SexW = "w";
+        public const string SexM = "M";
+        public const string SexW = "W";
+
+        public const string lblPatientData = "Patientendaten: ";
+        public const string lblAnonymousData = "Anonymisierte Daten: ";
+        public const string lblAnonymousDataAnonym= "Anonymisiert: ";
+        public const string lbAnonymousDataSuppressed = "Tupel-Unterdrückt: "; 
 
         
         public const string ColID = "ID";
@@ -28,8 +33,8 @@ namespace SKAT_Anonymizer
         public const string ColTimeOfDialysis = "Dialysezeit min";
         public const string ColBloodFlow = "Blutfluss ml pro min";
 
-        public const string ColGroupDescription = "Group";
-        public const string ColGroupSizeK = "K";
+        public const string ColGroupDescription = "Gruppe";
+        public const string ColGroupSizeK = "k";
         public const string ColTCloseness = "t ";
         public const string ColTClosenessGroup = ColTCloseness + "AEK";
 
