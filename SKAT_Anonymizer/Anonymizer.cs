@@ -586,8 +586,44 @@ namespace SKAT_Anonymizer
         private string GeneralizeAge(int age)
         {
             string generalizedAge = "";
-
-            if (age < CAnonymizer.Eighteen)
+            List<List<object>> setOfCriteria = null;
+            DataReader reader = new DataReader();
+            try
+            {
+                setOfCriteria = reader.ReadConfigFile(@"D:\ws-anonymizer\SKAT_Anonymizer\Config.xml");
+                foreach (var criteria in setOfCriteria)
+                {
+                    switch (criteria[(int)CAnonymizer.AgeCriteria.Condition])
+                    {
+                        case CAnonymizer.ConfigConditionYounger:
+                            if (age < Convert.ToInt32(criteria[(int)CAnonymizer.AgeCriteria.AgeLimit]))
+                            {
+                                generalizedAge = string.Format(CAnonymizer.AgeCriteriaYounger + "{0}", criteria[(int)CAnonymizer.AgeCriteria.AgeLimit]);
+                            }
+                            break;
+                        case CAnonymizer.ConfigConditionBetween:
+                            if (age >= Convert.ToInt32(criteria[(int)CAnonymizer.AgeCriteria.AgeLimit]) 
+                                && age <= Convert.ToInt32(criteria[(int)CAnonymizer.AgeCriteria.UpperAgeLimit]))
+                            {
+                                generalizedAge = string.Format("{0} " + CAnonymizer.AgeCriteriaBetween + "{1}", criteria[(int)CAnonymizer.AgeCriteria.AgeLimit],
+                                                                                                                criteria[(int)CAnonymizer.AgeCriteria.UpperAgeLimit]);
+                            }
+                            break;
+                        case CAnonymizer.ConfigConditionOlder:
+                            if (age > Convert.ToInt32(criteria[(int)CAnonymizer.AgeCriteria.AgeLimit]))
+                            {
+                                generalizedAge = string.Format(CAnonymizer.AgeCriteriaOlder + "{0}", criteria[(int)CAnonymizer.AgeCriteria.AgeLimit]);
+                            }
+                            break;
+                    }
+                }
+            }
+            finally
+            {
+                reader = null;
+            }
+            
+           /* if (age < CAnonymizer.Eighteen)
             {
                 generalizedAge = string.Format(CAnonymizer.AgeCriteriaYounger + "{0}", CAnonymizer.Eighteen);
             }
@@ -606,7 +642,7 @@ namespace SKAT_Anonymizer
             else if (age > CAnonymizer.Seventy)
             {
                 generalizedAge = string.Format(CAnonymizer.AgeCriteriaOlder + "{0}", CAnonymizer.Seventy);
-            }
+            }*/
             return generalizedAge;
         }
 

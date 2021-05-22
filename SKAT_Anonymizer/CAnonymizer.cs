@@ -6,9 +6,9 @@ namespace SKAT_Anonymizer
 {
     public static class CAnonymizer
     {
-        public const string AgeCriteriaYounger = " < ";
-        public const string AgeCriteriaBetween = " - ";
-        public const string AgeCriteriaOlder = " > ";
+        public const string AgeCriteriaYounger = "<";
+        public const string AgeCriteriaBetween = "-";
+        public const string AgeCriteriaOlder = ">";
         public const string AgeCriteriaEqual = "=";
 
         public const string SexM = "M";
@@ -42,6 +42,13 @@ namespace SKAT_Anonymizer
         public const string SortOrderDESC = "DESC";
 
         public const string MsgUnvailDatasize = "Bitte gültigen Wert eingeben 0 - 10.000.";
+
+        public const string ConfigCriteriaGroup = "Group";
+        public const string ConfigItem = "Item";
+        public const string ConfigConditionYounger = "younger";
+        public const string ConfigConditionBetween = "between";
+        public const string ConfigConditionOlder = "older";
+        
 
         public const int Eighteen = 18;
         public const int Thirty = 30;
@@ -99,6 +106,13 @@ namespace SKAT_Anonymizer
             TACUrea = 2,
             TimeOfDialysis = 3,
             Bloodflow = 4
+        }
+
+        public enum AgeCriteria: ushort
+        {
+            Condition = 0,
+            AgeLimit = 1,
+            UpperAgeLimit = 2
         }
     }
 }

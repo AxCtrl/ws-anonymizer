@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Please configure just {<=Age; >= Age; AgeX - AgeY} the groups shall not overlapping to each other. -->
+<GroupCriteria>
+	<Group id="1">
+		<Criteria>younger</Criteria>
+			<Item>18</Item>
+	</Group>
+	<Group id="2">
+		<Criteria>between</Criteria>
+			<Item>18</Item>
+			<Item>35</Item>
+	</Group>
+	<Group id="3">
+		<Criteria>between</Criteria>
+			<Item>36</Item>
+			<Item>50</Item>
+	</Group>
+	<Group id="4">
+		<Criteria>between</Criteria>
+			<Item>51</Item>
+			<Item>70</Item>
+	</Group>
+	<Group id="5">
+		<Criteria>between</Criteria>
+			<Item>70</Item>
+		<Item>90</Item>
+	</Group>
+	<Group id="6">
+		<Criteria>older</Criteria>
+		<Item>90</Item>
+	</Group>
+</GroupCriteria>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Xml;
 using System.Collections.Generic;
 using System.Text;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -52,8 +53,11 @@ namespace SKAT_Anonymizer
                 }
                 finally
                 {
-                    wbExcel.Close(true, null, null);
-                    appExcel.Quit();
+                    if (wbExcel != null)
+                    {
+                        wbExcel.Close(true, null, null);
+                        appExcel.Quit();
+                    }
                 }
 
                 return _patientDataSet;
@@ -63,6 +67,58 @@ namespace SKAT_Anonymizer
                 return null;
                 throw new FormatException(ExceptionUnvalidFile);
             }
+        }
+
+        public List<List<object>> ReadConfigFile(string filename)
+        {
+           
+            XmlTextReader xmlReader = null;
+            try
+            {
+                List<List<object>> setOfageCriteria = new List<List<object>>();
+                List<object> ageCriteria = null;
+                bool nextCriteria = true;
+
+                xmlReader = new XmlTextReader(filename);
+                xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                if (File.Exists(filename))
+                {
+                    while (xmlReader.Read())
+                    {
+                        switch (xmlReader.NodeType)
+                        {
+                            case XmlNodeType.Element:
+                                if (xmlReader.Name == CAnonymizer.ConfigCriteriaGroup)
+                                {
+                                  if (nextCriteria)
+                                    {
+                                        ageCriteria = new List<object>();
+                                        nextCriteria = false;
+                                    }
+                                }
+                                break;
+                            case XmlNodeType.Text:
+                                ageCriteria.Add(xmlReader.Value);
+                                break;
+                            case XmlNodeType.EndElement:
+                                if (xmlReader.Name == CAnonymizer.ConfigCriteriaGroup)
+                                {
+                                    setOfageCriteria.Add(ageCriteria);
+                                    nextCriteria = true;
+                                }
+                            break;
+                        }
+                    }
+                }
+                return setOfageCriteria;
+            }
+            finally
+            {
+                if (xmlReader != null)
+                {
+                    xmlReader.Close();
+                }
+            } 
         }
     }
 }
