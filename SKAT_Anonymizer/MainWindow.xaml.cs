@@ -93,42 +93,56 @@ namespace SKAT_Anonymizer
             _data.Clear();
             // Initialisieren Datatable.
 
-            int id = 1;
-            foreach (PatientData patient in patientDataSet)
+            if (patientDataSet != null)
             {
-                _data.Rows.Add(id, patient.Lastname, patient.Firstname, patient.Birth.ToShortDateString(),
-                              patient.Sex, patient.Diagnosis, patient.KtV, patient.PCR, patient.TACUrea,
-                              patient.TimeOfDialysis, patient.Bloodflow);
-                id++;
-                
+                int id = 1;
+                foreach (PatientData patient in patientDataSet)
+                {
+                    _data.Rows.Add(id, patient.Lastname, patient.Firstname, patient.Birth.ToShortDateString(),
+                                  patient.Sex, patient.Diagnosis, patient.KtV, patient.PCR, patient.TACUrea,
+                                  patient.TimeOfDialysis, patient.Bloodflow);
+                    id++;
+
+                }
+                return true;
             }
-            return true;
+            else
+            {
+                return false;
+            }
         }
 
         private bool ReadInAnonymizedData(Dictionary<int, List<object>> anonymousDataSet)
         {
             _anonymousData.Clear();
 
-            foreach (var anonymousPatient in anonymousDataSet)
+            if (anonymousDataSet != null)
             {
-                if (anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age].ToString() == "-")
+                foreach (var anonymousPatient in anonymousDataSet)
                 {
-                    _numOfSuppressedData++;
+                    if (anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age].ToString() == "-")
+                    {
+                        _numOfSuppressedData++;
+                    }
+                    else
+                    {
+                        _numOfAnonymousData++;
+                    }
+                    _anonymousData.Rows.Add(anonymousPatient.Key, anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Sex],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Diagnosis],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.KtV],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.PCR],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TACUrea],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TimeOfDialysis],
+                                                                 anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Bloodflow]);
                 }
-                else
-                {
-                    _numOfAnonymousData++;
-                }
-                _anonymousData.Rows.Add(anonymousPatient.Key, anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Age],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Sex],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Diagnosis],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.KtV],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.PCR],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TACUrea],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.TimeOfDialysis],
-                                                             anonymousPatient.Value.ToArray()[(int)CAnonymizer.Attribute.Bloodflow]);
+                return true;
             }
-            return true;
+            else
+            {
+                return false;
+            }
         }
 
         private bool ReadInKTCriteriaData(Anonymizer anonymizer)
@@ -184,8 +198,6 @@ namespace SKAT_Anonymizer
 
             if (!(anonymizer is null))
             {
-
-
                 List<string> groups = anonymizer.QIA;
                 Dictionary<string, int> groupSizes = anonymizer.KAnonymity;
 
@@ -224,7 +236,18 @@ namespace SKAT_Anonymizer
                 txtbxFilename.Text = filename;
 
                 DataReader dr = new DataReader();
-                _patientDataSet = dr.ReadDataFromExcel(filename);
+                try
+                {
+                    _patientDataSet = dr.ReadDataFromExcel(filename);
+                }
+                catch
+                {
+                    MessageBox.Show("Ungültige Datei, bitte prüfen Sie die Formatierung");
+                }
+                finally
+                {
+                    dr = null;
+                }
 
                 // convert data array in a datatable to show in datagrid.
                 if (ReadInPatientData(_patientDataSet))

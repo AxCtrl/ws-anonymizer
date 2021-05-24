@@ -7,4 +7,3 @@ D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientData
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientDataGenerator.csproj.CoreCompileInputs.cache
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientDataGenerator.exe
 D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientDataGenerator.pdb
-D:\ws-anonymizer\PatientDataGenerator\PatientDataGenerator\obj\Debug\PatientDataGenerator.csprojAssemblyReference.cache

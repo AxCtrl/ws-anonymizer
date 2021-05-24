@@ -73,9 +73,9 @@ namespace SKAT_Anonymizer
 
         public static readonly List<int> TACUreaGeneralization = new List<int>{ 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 85, 90, 100 };
  
-        public static readonly List<int> TimeOfDialysisGeneralization = new List<int>{ 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 
+        public static readonly List<int> TimeOfDialysisGeneralization = new List<int>{  120, 130, 140, 150, 160, 170, 180, 190, 200, 
                                                                                        210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 
-                                                                                       310, 320, 330, 340, 350, 360 };
+                                                                                       310, 320, 330, 340, 350};
         public static readonly List<int> BloodflowGeneralization = new List<int>{ 150, 200, 250, 300, 350, 400, 450, 500 };
 
         public enum Attribute : ushort

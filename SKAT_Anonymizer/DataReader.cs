@@ -13,7 +13,6 @@ namespace SKAT_Anonymizer
         private const string validFileExt = ".xlsx";
         private const string ExceptionUnvalidFile = "Ungültiger Dateityp. Bitte wählen Sie eine .xlsx Datei";
 
-        string[][] _dataSet;
         PatientData[] _patientDataSet;
         public PatientData[] ReadDataFromExcel(string filepath)
         {
@@ -27,27 +26,32 @@ namespace SKAT_Anonymizer
 
                 int rows = range.Rows.Count;
                 int cols = range.Columns.Count;
-                _dataSet = new string[rows][];
+                List<object> patient = null;
                 _patientDataSet = new PatientData[rows - 1];
                 
                 try
                 {
-                    for (int rowCount = 0; rowCount < rows; rowCount++)
+                    for (int rowCount = 1; rowCount < rows; rowCount++)
                     {
 
                         //_dataSet[rowCount] = new string[cols];
-                        if (rowCount <= rows - 2)
+                        if (rowCount <= rows - 1)
                         {
-                            _patientDataSet[rowCount] = new PatientData((string)(range.Cells[rowCount + 2, (int)PatientData.Attribute.Lastname + 1] as Excel.Range).Value2,
-                                                                            (string)(range.Cells[rowCount + 2, (int)PatientData.Attribute.Firstname + 1] as Excel.Range).Value2,
-                                                                            DateTime.Parse((string)(range.Cells[rowCount + 2, (int)PatientData.Attribute.Birth + 1] as Excel.Range).Value2),
-                                                                            (string)(range.Cells[rowCount + 2, (int)PatientData.Attribute.Sex + 1] as Excel.Range).Value2,
-                                                                            (string)(range.Cells[rowCount + 2, (int)PatientData.Attribute.Diagnosis + 1] as Excel.Range).Value2,
-                                                                            Convert.ToDouble((range.Cells[rowCount + 2, (int)PatientData.Attribute.KtV + 1] as Excel.Range).Value2),
-                                                                            Convert.ToDouble((range.Cells[rowCount + 2, (int)PatientData.Attribute.PCR + 1] as Excel.Range).Value2),
-                                                                            Convert.ToDouble((range.Cells[rowCount + 2, (int)PatientData.Attribute.TacUrea + 1] as Excel.Range).Value2),
-                                                                            Convert.ToInt32((range.Cells[rowCount + 2, (int)PatientData.Attribute.TimeOfDialysis + 1] as Excel.Range).Value2),
-                                                                            Convert.ToInt32((range.Cells[rowCount + 2, (int)PatientData.Attribute.BloodFlow + 1] as Excel.Range).Value2));
+                            patient = new List<object>();
+                            for (int colCount = 1; colCount <= cols; colCount++)
+                            {
+                                patient.Add((range.Cells[rowCount + 1, colCount] as Excel.Range).Value2);
+                            }
+                            _patientDataSet[rowCount - 1] = new PatientData(patient[(int)PatientData.Attribute.Lastname].ToString(),
+                                                                        patient[(int)PatientData.Attribute.Firstname].ToString(),
+                                                                        Convert.ToDateTime(patient[(int)PatientData.Attribute.Birth]),
+                                                                        patient[(int)PatientData.Attribute.Sex].ToString(),  
+                                                                        patient[(int)PatientData.Attribute.Diagnosis].ToString(),
+                                                                        Convert.ToDouble(patient[(int)PatientData.Attribute.KtV]),
+                                                                        Convert.ToDouble(patient[(int)PatientData.Attribute.PCR]),
+                                                                        Convert.ToDouble(patient[(int)PatientData.Attribute.TacUrea]),
+                                                                        Convert.ToInt32(patient[(int)PatientData.Attribute.TimeOfDialysis]),
+                                                                        Convert.ToInt32(patient[(int)PatientData.Attribute.BloodFlow]));
                         } 
                     }
                 }

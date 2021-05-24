@@ -256,7 +256,7 @@ namespace PatientDataGenerator
             List<DateTime> birthDates = GenerateBirthDates(1921, 2016, 5);
             double[] ktv = GenerateKtV(0.800, 2.500, 0.100);
             double[] pcr = GeneratePCR(0.500, 2.500, 0.100);
-            double[] tacUrea = GenerateTACUrea(15.0, 75.0, 0.1);
+            double[] tacUrea = GenerateTACUrea(15.0, 100.0, 0.1);
             int[] timeOfDialysis = GenerateTimeOfDialysis(120, 350, 1);
             int[] bloodflow = GenerateBloodflow(100, 500, 1);
 

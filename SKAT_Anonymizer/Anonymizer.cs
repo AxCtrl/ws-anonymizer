@@ -622,27 +622,6 @@ namespace SKAT_Anonymizer
             {
                 reader = null;
             }
-            
-           /* if (age < CAnonymizer.Eighteen)
-            {
-                generalizedAge = string.Format(CAnonymizer.AgeCriteriaYounger + "{0}", CAnonymizer.Eighteen);
-            }
-            else if (age >= CAnonymizer.Eighteen && age <=CAnonymizer.Thirty)
-            {
-                generalizedAge = string.Format("{0} " + CAnonymizer.AgeCriteriaBetween + "{1}", CAnonymizer.Eighteen, CAnonymizer.Thirty);
-            }
-            else if (age > CAnonymizer.Thirty && age <= CAnonymizer.Fifty)
-            {
-                generalizedAge = string.Format("{0} " + CAnonymizer.AgeCriteriaBetween + "{1}", CAnonymizer.ThirtyOne, CAnonymizer.Fifty);
-            }
-            else if (age > CAnonymizer.Fifty && age <= CAnonymizer.Seventy)
-            {
-                generalizedAge = string.Format("{0} " + CAnonymizer.AgeCriteriaBetween + "{1}", CAnonymizer.FiftyOne, CAnonymizer.Seventy);
-            }
-            else if (age > CAnonymizer.Seventy)
-            {
-                generalizedAge = string.Format(CAnonymizer.AgeCriteriaOlder + "{0}", CAnonymizer.Seventy);
-            }*/
             return generalizedAge;
         }
 
